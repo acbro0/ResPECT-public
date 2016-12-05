@@ -12,72 +12,122 @@ model or else the output doesn't make sense. While we're at it, load
 ggplot2 and dplyr also.
 
 ```{r}
-require("MCMCglmm")
-require("ggplot2")
-require("dplyr")
+library("pscl")
+library("ggplot2")
+library("dplyr")
 
-load("/home/lex/Desktop/vacc-affect-abs-model1.RData")
+load("/home/alexandria/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
 
-summary(vacc_model)
+summary(AbsentModelhurd)
 
-load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
+load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
 
 summary(htype_model)     
-
-load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
-
 
 ```
 
 Make some nice figures of the results.  
 
 ```{r}
-vac <- summary(vacc_model)
+vac <- summary(AbsentModelhurd)
 
-vac <- data.frame(vac$solutions)
+vac_count <- data.frame(coef(vac)$count)
 
-vac$predictors <- rownames(vac)
+vac_zero <- data.frame(coef(vac)$zero)
 
-vac <- filter(vac, predictors != "(Intercept)")
+vac_count$predictors <- rownames(vac_count)
+vac_zero$predictors <- rownames(vac_zero)
 
-vac$predictors <- c("vaccinated", "VA", 
+vac_count <- filter(vac_count, predictors != "(Intercept)")
+vac_zero <- filter(vac_zero, predictors != "(Intercept)")
+
+vac_count$predictors <- c("vaccinated", 
                     "male", "2014", "2015", "URI exposure", 
-                    "hand hygiene", "age")
+                    "hand hygiene:usually", "hand hygiene:sometimes",
+                    "hand hygiene:unknown", "age", "VA")
 
-ggplot(vac, aes(x = predictors, y = post.mean)) +                                                   
+vac_zero$predictors <- c("vaccinated", 
+                    "male", "2014", "2015", "URI exposure", 
+                    "hand hygiene:usually", "hand hygiene:sometimes",
+                    "hand hygiene:unknown", "age", "VA")
+
+ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +                                                   
   theme_bw() + 
-  geom_pointrange (aes (ymin = l.95..CI, ymax = u.95..CI)) +              
+  geom_pointrange (aes (ymin = exp(Estimate-Std..Error), ymax = exp(Estimate+Std..Error))) +              
   coord_flip() +               
-  geom_hline(aes(yintercept=0), lty=2) +           
+  geom_hline(aes(yintercept=1), lty=2) +           
   labs(y = "95% CI", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold"))   
+  theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold")) +
+  ggtitle("Relative risk estimates for absenteeism in HCW who took at least 1 sick day")+
+  theme(panel.grid.minor=element_blank())
+
+ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +                                                   
+  theme_bw() + 
+  geom_pointrange (aes (ymin = exp(Estimate-Std..Error), ymax = exp(Estimate+Std..Error))) +              
+  coord_flip() +               
+  geom_hline(aes(yintercept=1), lty=2) +           
+  labs(y = "95% CI", x = NULL) +                 
+  theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold")) +
+  ggtitle("Odds of HCP taking at least 1 sick day")+
+  theme(panel.grid.minor=element_blank())
+
 ```
 
 Here's the figure for the model that shows whether PS hospital type is associated 
 with more vaccinated participants. 
 
 ```{r}
-vac <- summary(htype_model)                                                                                                                                                                
-vac <- data.frame(vac$solutions)
+vac <- summary(htype_model)       
+
+vac <- data.frame(coef(vac))
 
 vac$predictors <- rownames(vac)
 
-require(dplyr)
-
 vac <- filter(vac, predictors != "(Intercept)")
 
-vac$predictors <- c("VA", "male", "2014", "2015", "URI exposure",
-                    "hand hygiene", "age")
+vac$predictors <- c("VA", 
+                    "male", "2014", "2015", "URI exposure", 
+                    "hand hygiene:usually", "hand hygiene:sometimes",
+                    "hand hygiene:unknown", "age")
 
-ggplot(vac, aes(x = predictors, y = post.mean)) +                                
-  theme_bw() +                                   
-  geom_pointrange (aes (ymin = l.95..CI, ymax = u.95..CI)) +      
-  geom_point()+                   
-  coord_flip() +            
-    geom_hline(aes(yintercept=0), lty=2) +         
-  labs(y = "95% CI", x = NULL) +              
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold"))     
+levels(vac$predictors) <- c("VA", 
+                    "male", "2014", "2015", "URI exposure", 
+                     "hand hygiene:sometimes",
+                   "hand hygiene:usually", "hand hygiene:unknown",
+                   "age")
+
+ggplot(vac, aes(x=predictors, y = exp(Estimate))) +                                                   
+  theme_bw() + 
+  geom_pointrange (aes (ymin = exp(Estimate-Std..Error), ymax = exp(Estimate+Std..Error))) +              
+  coord_flip() +               
+  geom_hline(aes(yintercept=1), lty=2) +           
+  labs(y = "95% CI", x = NULL) +                 
+  theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold")) +
+  ggtitle("Odds of HCP influenza vaccination") +
+  theme(panel.grid.minor=element_blank())
+   
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Model diagnostics.  This is model 1 run seperately for each group, as suggested by Derek.
 
