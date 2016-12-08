@@ -15,7 +15,7 @@ ggplot2 and dplyr also.
 library("pscl")
 library("ggplot2")
 library("dplyr")
-library("gridExtra")
+library("grid")
 
 load("/home/alexandria/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
 #load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
@@ -45,9 +45,9 @@ vac_count <- filter(vac_count, predictors != "(Intercept)")
 vac_zero <- filter(vac_zero, predictors != "(Intercept)")
 
 vac_count$predictors <- c("vaccinated vs. unvaccinated", 
-                    "male vs. female", "2014 vs. 2013", "2015 vs. 2013", "URI exposure (10% increments)", 
-                    "hand hygiene: usually vs. never", "hand hygiene: sometimes vs. never",
-                    "hand hygiene: unknown vs. never", "age (10 year increments)", 
+                    "male vs. female", "2014 vs. 2013", "2015 vs. 2013", 
+                    "URI exposure (10% increments)", 
+                   "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")
 
 vac_count$Estimate[vac_count$predictors=="URI exposure (10% increments)"]<- 
@@ -66,15 +66,11 @@ vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("vaccinated vs
                                                       "non-mandatory sites vs. mandatory sites",
                                                       "male vs. female", "URI exposure (10% increments)",
                                                       "age (10 year increments)", 
-                                                      "2014 vs. 2013", "2015 vs. 2013", 
-                                                      "hand hygiene: usually vs. never", 
-                                                      "hand hygiene: sometimes vs. never",
-                                                      "hand hygiene: unknown vs. never")))
+                                                      "2014 vs. 2013", "2015 vs. 2013")))
 
 vac_zero$predictors <-  c("vaccinated vs. unvaccinated", 
                     "male vs. female", "2014 vs. 2013", "2015 vs. 2013", "URI exposure (10% increments)", 
-                    "hand hygiene: usually vs. never", "hand hygiene: sometimes vs. never",
-                    "hand hygiene: unknown vs. never", "age (10 year increments)", 
+                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")
 
 vac_zero$Estimate[vac_zero$predictors=="URI exposure (10% increments)"] <- 
@@ -89,14 +85,11 @@ vac_zero$Estimate[vac_zero$predictors=="age (10 year increments)"] <-
 vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"] <- 
   vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"]*10
 
-vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("vaccinated vs. unvaccinated", 
-                                                      "non-mandatory sites vs. mandatory sites",
+vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("non-mandatory sites vs. mandatory sites",
+                                                                "vaccinated vs. unvaccinated", 
                                                       "male vs. female", "URI exposure (10% increments)",
                                                       "age (10 year increments)", 
-                                                      "2014 vs. 2013", "2015 vs. 2013", 
-                                                      "hand hygiene: usually vs. never", 
-                                                      "hand hygiene: sometimes vs. never",
-                                                      "hand hygiene: unknown vs. never")))
+                                                      "2014 vs. 2013", "2015 vs. 2013")))
 
 vc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +                                                   
   theme_bw() + 
