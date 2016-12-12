@@ -4,12 +4,7 @@ author: "Alexandria C. Brown"
 date: "Nov 28, 2016"
 output: pdf_document
 ---
-The models will take a few hours to run.  When they are finished 
-you can download the model outputs to your computer using scp
-and work with them locally, which is helpful for creating plots.
-Load the package used to create the
-model or else the output doesn't make sense. While we're at it, load 
-ggplot2 and dplyr also.
+
 
 ```{r}
 library("pscl")
@@ -62,8 +57,8 @@ vac_count$Estimate[vac_count$predictors=="age (10 year increments)"] <-
 vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"] <- 
   vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"]*10
 
-vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("vaccinated vs. unvaccinated", 
-                                                      "non-mandatory sites vs. mandatory sites",
+vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("non-mandatory sites vs. mandatory sites",
+                                                                  "vaccinated vs. unvaccinated", 
                                                       "male vs. female", "URI exposure (10% increments)",
                                                       "age (10 year increments)", 
                                                       "2014 vs. 2013", "2015 vs. 2013")))
@@ -86,7 +81,7 @@ vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"] <-
   vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"]*10
 
 vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("non-mandatory sites vs. mandatory sites",
-                                                                "vaccinated vs. unvaccinated", 
+                                                                  "vaccinated vs. unvaccinated", 
                                                       "male vs. female", "URI exposure (10% increments)",
                                                       "age (10 year increments)", 
                                                       "2014 vs. 2013", "2015 vs. 2013")))
@@ -138,8 +133,7 @@ vac <- filter(vac, predictors != "(Intercept)")
 
 vac$predictors <- c("non-mandatory sites vs. mandatory sites", 
                     "male vs. female", "2014 vs. 2013", "2015 vs. 2013", "URI exposure (10% increments)", 
-                    "hand hygiene: usually vs. never", "hand hygiene: sometimes vs. never",
-                    "hand hygiene: unknown vs. never", "age (10 year increments)")
+                    "age (10 year increments)")
 
 vac$predictors <- as.factor(vac$predictors)
 
@@ -158,10 +152,7 @@ vac$Std..Error[vac$predictors=="age (10 year increments)"] <-
 vac$predictors <- factor(vac$predictors, levels=rev(c("non-mandatory sites vs. mandatory sites", 
                     "male vs. female", "URI exposure (10% increments)", 
                     "age (10 year increments)", 
-                    "2014 vs. 2013", "2015 vs. 2013", 
-                    "hand hygiene: usually vs. never", 
-                    "hand hygiene: sometimes vs. never",
-                    "hand hygiene: unknown vs. never")))
+                    "2014 vs. 2013", "2015 vs. 2013")))
 
 ggplot(vac, aes(x=predictors, y = exp(Estimate))) +                                                   
   theme_bw() + 
