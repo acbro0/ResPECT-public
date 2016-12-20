@@ -15,16 +15,16 @@ chco$Date <- ymd(chco$Date)
 
 chco <- arrange(chco, Date)
 
-dates <- read.csv("~/Desktop/chco-trigger-dates.csv", stringsAsFactors = F)
+dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
 
 dates$startDate <- ymd(dates$startDate)
 
 dates$endDate <- ymd(dates$endDate)
 
 #truncate to get years we have cutoffs for and cutoffs we have years for.
-chco <- filter(chco, Date >= first(dates$startDate)-weeks(2))
+chco <- filter(chco, Date >= head(dates$startDate, 1)-weeks(2))
 
-dates <- filter(dates, endDate <= last(chco$Date)+weeks(6))
+dates <- filter(dates, endDate <= tail(chco$Date, 1)+weeks(6))
 
 alertholder <- createALERT(chco, firstMonth=8, lag=0)
 
@@ -141,7 +141,7 @@ comparison <- full_join(data.frame(stats_real), alertholder)
 
 require(xtable)
 
-print(xtable(comparison[1:7]), type="html", include.rownames=F)
+print(xtable(comparison[1:7]), include.rownames=F)
 
 str(stats_real)
 
@@ -162,6 +162,7 @@ ymin <- -2
 
 datetrig <- ggplot() + #this is the real dates
   theme_classic() +
+  labs(y = "Influenza A cases", x = "Date-based intervention periods") +
   geom_bar(aes(y=chco$Cases, x=chco$Date), stat="identity") +
   geom_rect(aes(xmin = dates$startDate[1], 
                 xmax = dates$endDate[1], 
@@ -190,6 +191,7 @@ datetrig <- ggplot() + #this is the real dates
 
 threstrig <- ggplot() + #this is the ALERT dates
   theme_classic() +
+  labs(y = "Influenza A cases", x = "Threshold-based intervention periods") +
   geom_bar(aes(y=chco$Cases, x=chco$Date), stat="identity") +
   geom_hline(aes(yintercept=threshold), linetype="dashed", 
              alpha=0.5, show.legend = FALSE) +
