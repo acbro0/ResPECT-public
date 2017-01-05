@@ -17,8 +17,9 @@ load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
 
 summary(AbsentModelhurd)
 
-load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
-#load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
+#load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
+load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
+
 
 summary(htype_model)     
 
@@ -41,14 +42,11 @@ vac_zero <- filter(vac_zero, predictors != "(Intercept)")
 
 vac_count$predictors <- c("2014 vs. 2013", 
                           "2015 vs. 2013", 
-                          "2013 vaccination",
-                          "2014 vaccination",
-                          "2015 vaccination",
+                          "2013 & 2014 vaccinated vs. unvaccinated",
+                          "2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
-                          "number children <5: 1 vs. 0",
-                          "number children <5: 2 vs. 0",
-                          "number children <5: >2 vs. 0",
-                    "number children <5: no report vs. 0",
+                          "children under 5 in household: yes vs. no",
+                    "children under 5 in household: no report vs. no",
                     "URI exposure (10% increments)", 
                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")
@@ -67,28 +65,22 @@ vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"] <-
 
 vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("2014 vs. 2013", 
                           "2015 vs. 2013", 
-                          "2013 vaccination",
-                          "2014 vaccination",
-                          "2015 vaccination",
+                          "2013 & 2014 vaccinated vs. unvaccinated",
+                          "2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
-                          "number children <5: 1 vs. 0",
-                          "number children <5: 2 vs. 0",
-                          "number children <5: >2 vs. 0",
-                    "number children <5: no report vs. 0",
+                          "children under 5 in household: yes vs. no",
+                    "children under 5 in household: no report vs. no",
                     "URI exposure (10% increments)", 
                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")))
 
 vac_zero$predictors <-  c("2014 vs. 2013", 
                           "2015 vs. 2013", 
-                          "2013 vaccination",
-                          "2014 vaccination",
-                          "2015 vaccination",
+                          "2013 & 2014 vaccinated vs. unvaccinated",
+                          "2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
-                          "number children <5: 1 vs. 0",
-                          "number children <5: 2 vs. 0",
-                          "number children <5: >2 vs. 0",
-                    "number children <5: no report vs. 0",
+                          "children under 5 in household: yes vs. no",
+                    "children under 5 in household: no report vs. no",
                     "URI exposure (10% increments)", 
                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")
@@ -107,14 +99,11 @@ vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"] <-
 
 vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("2014 vs. 2013", 
                           "2015 vs. 2013", 
-                          "2013 vaccination",
-                          "2014 vaccination",
-                          "2015 vaccination",
+                          "2013 & 2014 vaccinated vs. unvaccinated",
+                          "2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
-                          "number children <5: 1 vs. 0",
-                          "number children <5: 2 vs. 0",
-                          "number children <5: >2 vs. 0",
-                    "number children <5: no report vs. 0",
+                          "children under 5 in household: yes vs. no",
+                    "children under 5 in household: no report vs. no",
                     "URI exposure (10% increments)", 
                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")))
@@ -124,9 +113,9 @@ vc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Relative rate", x = NULL) +                 
+  labs(y = "Adjusted relative rate of HCW absenteeism", x = NULL) +                 
   theme(axis.text = element_text(size=14),  axis.title=element_text(size=16,face="bold")) +
-  ggtitle("Adjusted relative rate of HCW absenteeism")+
+#  ggtitle("Adjusted relative rate of HCW absenteeism")+
   theme(panel.grid.minor=element_blank(), 
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank()) +
@@ -137,9 +126,9 @@ vz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Odds ratio", x = NULL) +                 
+  labs(y = "Adjusted odds ratios for HCW taking any sick time", x = NULL) +                 
   theme(axis.text = element_text(size=14),  axis.title=element_text(size=16,face="bold")) +
-  ggtitle("Adjusted odds ratios for HCW taking any sick time")+
+ # ggtitle("Adjusted odds ratios for HCW taking any sick time")+
   theme(panel.grid.minor=element_blank()) +
   scale_y_log10(breaks=pretty(exp(vac_zero$Estimate)))
 
@@ -164,9 +153,14 @@ vac$predictors <- rownames(vac)
 
 vac <- filter(vac, predictors != "(Intercept)")
 
-vac$predictors <- c("non-mandatory sites vs. mandatory sites", 
-                    "male vs. female", "2014 vs. 2013", "2015 vs. 2013", "URI exposure (10% increments)", 
-                    "age (10 year increments)")
+vac$predictors <- c("2014 vs. 2013", 
+                    "2015 vs. 2013", 
+                    "male vs. female",
+                    "children under 5 in household: yes vs. no",
+                    "children under 5 in household: no report vs. no",
+                    "URI exposure (10% increments)", 
+                   "age (10 year increments)", 
+                    "non-mandatory sites vs. mandatory sites")
 
 vac$predictors <- as.factor(vac$predictors)
 
@@ -182,19 +176,22 @@ vac$Estimate[vac$predictors=="age (10 year increments)"] <-
 vac$Std..Error[vac$predictors=="age (10 year increments)"] <- 
   vac$Std..Error[vac$predictors=="age (10 year increments)"]*10
 
-vac$predictors <- factor(vac$predictors, levels=rev(c("non-mandatory sites vs. mandatory sites", 
-                    "male vs. female", "URI exposure (10% increments)", 
-                    "age (10 year increments)", 
-                    "2014 vs. 2013", "2015 vs. 2013")))
+vac$predictors <- factor(vac$predictors, levels=rev(c("2014 vs. 2013", 
+                    "2015 vs. 2013", 
+                    "male vs. female",
+                    "children under 5 in household: yes vs. no",
+                    "children under 5 in household: no report vs. no",
+                    "URI exposure (10% increments)", 
+                   "age (10 year increments)", 
+                    "non-mandatory sites vs. mandatory sites")))
 
-ggplot(vac, aes(x=predictors, y = exp(Estimate))) +                                                   
-  theme_bw() + 
+ggplot(vac, aes(x=predictors, y = exp(Estimate))) +                                                   theme_bw() + 
   geom_pointrange (aes (ymin = exp(Estimate-Std..Error), ymax = exp(Estimate+Std..Error))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Odds ratio", x = NULL) +                 
+  labs(y = "Adjusted odds ratios for HCW influenza vaccination", x = NULL) +                 
   theme(axis.text = element_text(size=14),  axis.title=element_text(size=16,face="bold")) +
-  ggtitle("Adjusted odds ratios for HCW influenza vaccination") +
+ # ggtitle("Adjusted odds ratios for HCW influenza vaccination") +
   theme(panel.grid.minor=element_blank()) +
   scale_y_log10(breaks=pretty(exp(vac$Estimate)))
    
