@@ -12,13 +12,13 @@ library("ggplot2")
 library("dplyr")
 library("grid")
 
-#load("/home/alexandria/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
-load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
+load("/home/alexandria/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
+#load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
 
 summary(AbsentModelhurd)
 
-#load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
-load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
+load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
+#load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
 
 
 summary(htype_model)     
@@ -114,7 +114,7 @@ vc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
   labs(y = "C. Adjusted relative rate of HCW absenteeism", x = NULL) +                 
-  theme(axis.text = element_text(size=14),  axis.title=element_text(size=12,face="bold")) +
+  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted relative rate of HCW absenteeism")+
   theme(panel.grid.minor=element_blank(), 
         axis.text.y=element_blank(),
@@ -127,7 +127,7 @@ vz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
   labs(y = "B. Adjusted odds ratios for HCW taking any sick time", x = NULL) +                 
-  theme(axis.text = element_text(size=14),  axis.title=element_text(size=12,face="bold")) +
+  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW taking any sick time")+
   theme(panel.grid.minor=element_blank()) +
   scale_y_log10(breaks=pretty(exp(vac_zero$Estimate)))
@@ -185,12 +185,14 @@ htyp <- ggplot(vac, aes(x=predictors, y = exp(Estimate))) +
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
   labs(y = "A. Adjusted odds ratios for HCW influenza vaccination", x = NULL) +                 
-  theme(axis.text = element_text(size=14),  axis.title=element_text(size=12,face="bold")) +
+  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW influenza vaccination") +
   theme(panel.grid.minor=element_blank()) +
   scale_y_log10(breaks=pretty(exp(vac$Estimate)))
 
 ###formatting the figure
+
+options(digits=1)
 
 grid.newpage()
 pushViewport(viewport(layout = 
