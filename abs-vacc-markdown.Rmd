@@ -12,13 +12,13 @@ library("ggplot2")
 library("dplyr")
 library("grid")
 
-load("/home/alexandria/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
-#load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
+#load("/home/alexandria/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
+load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid.RData")
 
 summary(AbsentModelhurd)
 
-load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
-#load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
+#load("/home/alexandria/Desktop/policy-affect-vacc-model2.RData")
+load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
 
 
 summary(htype_model)     
@@ -113,24 +113,24 @@ vc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "C. Adjusted relative rate of HCW absenteeism", x = NULL) +                 
+  labs(y = "Adjusted relative rate for number of days absent", x = NULL) +                 
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted relative rate of HCW absenteeism")+
-  theme(panel.grid.minor=element_blank(), 
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  scale_y_log10(breaks=pretty(exp(vac_count$Estimate)))
+  theme(panel.grid.minor=element_blank())+
+  ylim(0.07, 2.4) 
+  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 vz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +                         
   theme_bw() + 
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "B. Adjusted odds ratios for HCW taking any sick time", x = NULL) +                 
+  labs(y = "Adjusted odds ratios for whether HCP took sick time", x = NULL) +                 
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW taking any sick time")+
-  theme(panel.grid.minor=element_blank()) +
-  scale_y_log10(breaks=pretty(exp(vac_zero$Estimate)))
+  theme(panel.grid.minor=element_blank()) + 
+  ylim(0.07, 2.4) 
+  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 
 ```
@@ -179,16 +179,17 @@ vac$predictors <- factor(vac$predictors, levels=rev(c("2014 vs. 2013",
                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")))
 
-htyp <- ggplot(vac, aes(x=predictors, y = exp(Estimate))) +                                                   
+htyp <- ggplot(vac, aes(x=predictors, y = exp(vac$Estimate))) +                                                   
   theme_bw() + 
   geom_pointrange (aes (ymin = exp(Estimate-Std..Error), ymax = exp(Estimate+Std..Error))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "A. Adjusted odds ratios for HCW influenza vaccination", x = NULL) +                 
+  labs(y = "Adjusted odds ratios for HCP influenza vaccination", x = NULL) +                 
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW influenza vaccination") +
-  theme(panel.grid.minor=element_blank()) +
-  scale_y_log10(breaks=pretty(exp(vac$Estimate)))
+  theme(panel.grid.minor=element_blank()) + 
+  ylim(0.07, 2.4) 
+  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ###formatting the figure
 
@@ -196,12 +197,15 @@ options(digits=1)
 
 grid.newpage()
 pushViewport(viewport(layout = 
-                        grid.layout(nrow = 2, ncol = 2, 
-                        widths = unit(c(1.9, 1), "null"))))
+                        grid.layout(nrow = 3, ncol = 2, 
+                        widths = unit(c(0.05, 1), "null"))))
 
-print(vz, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-print(vc, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
-print(htyp, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
+print(vz, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+print(vc, vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
+print(htyp, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text("A)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("B)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+grid.text("C)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
    
 ```
 
