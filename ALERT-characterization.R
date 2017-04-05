@@ -393,7 +393,7 @@ grid.arrange(
 
 ###get the other diseases
 
-all <- read.csv("~/Desktop/chco.csv", stringsAsFactors = F)
+all <- read.csv("~/Desktop/applied-ALERT-data/chco.csv", stringsAsFactors = F)
 
 bugnames <- colnames(all[2:12])
 
@@ -599,8 +599,9 @@ ggplot(simset, aes(x=Date, y=Cases)) +
 
 cor(all)
 
-
-#use ALERT on each CHCO dataset
+###################################
+#use ALERT on each CHCO dataset###
+###################################
 
 head(all)
 

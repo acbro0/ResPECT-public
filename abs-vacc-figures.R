@@ -1,12 +1,12 @@
----
-title: "Absenteeism-and-vaccination"
-author: "Alexandria C. Brown"
-date: "Nov 28, 2016"
-output: pdf_document
----
+##---
+#title: "Absenteeism-and-vaccination"
+#author: "Alexandria C. Brown"
+#date: "Nov 28, 2016"
+#output: pdf_document
+#---
 
 
-```{r}
+#```{r}
 library("pscl")
 library("ggplot2")
 library("dplyr")
@@ -27,11 +27,11 @@ load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid-VAsubset.RData"
 
 summary(VAbsentModelhurd)
 
-```
+#``
 
-Make some nice figures of the results.  
+#Make some nice figures of the results.  
 
-```{r}
+#```{r}
 vac <- summary(AbsentModelhurd)
 
 vac_count <- data.frame(coef(vac)$count)
@@ -121,7 +121,8 @@ vc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted relative rate of HCW absenteeism")+
   theme(panel.grid.minor=element_blank())+
-  ylim(0.07, 2.4) 
+  ylim(0.07, 2.4) +
+  annotate("text", x = 6.5, y = 0.1, label = "A)", size=5)
   #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 vz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +                         
@@ -133,7 +134,8 @@ vz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW taking any sick time")+
   theme(panel.grid.minor=element_blank()) + 
-  ylim(0.07, 2.4) 
+  ylim(0.07, 2.4) +
+  annotate("text", x = 6.5, y = 0.1, label = "B)", size=5)
   #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ####### This is for the VAsubset only
@@ -219,11 +221,12 @@ ssvc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Adjusted relative rate for number of days absent", x = NULL) +                 
+  labs(y = "Adjusted relative rate for number of days absent - VA subset", x = NULL) +                 
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted relative rate of HCW absenteeism")+
   theme(panel.grid.minor=element_blank())+
-  ylim(0.07, 2.4) 
+  ylim(0.07, 2.4) +
+  annotate("text", x = 6.5, y = 0.1, label = "C)", size=5)
   #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ssvz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +                         
@@ -231,19 +234,20 @@ ssvz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Adjusted odds ratios for whether HCP took sick time", x = NULL) +                 
+  labs(y = "Adjusted odds ratios for whether HCP took sick time - VA subset", x = NULL) +                 
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW taking any sick time")+
   theme(panel.grid.minor=element_blank()) + 
-  ylim(0.07, 2.4) 
+  ylim(0.07, 2.4) +
+  annotate("text", x = 6.5, y = 0.1, label = "D)", size=5)
   #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
-```
+#```
 
-Here's the figure for the model that shows whether PS hospital type is associated 
-with more vaccinated participants. 
+#Here's the figure for the model that shows whether PS hospital type is associated 
+#with more vaccinated participants. 
 
-```{r}
+#```{r}
 vac <- summary(htype_model)       
 
 vac <- data.frame(coef(vac))
@@ -293,34 +297,35 @@ htyp <- ggplot(vac, aes(x=predictors, y = exp(vac$Estimate))) +
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW influenza vaccination") +
   theme(panel.grid.minor=element_blank()) + 
-  ylim(0.07, 2.4) 
+  ylim(0.07, 2.4) +
+  annotate("text", x = 6.5, y = 0.1, label = "E)", size=5)
   #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ###formatting the figure
 
 library(gridExtra)
 
-grid.arrange(vc, vz, ssvc, ssvz, htyp)
+grid.arrange(vc, vz, ssvc, ssvz, htyp, ncol=1)
 
 options(digits=1)
 
-grid.newpage()
-pushViewport(viewport(layout = 
-                        grid.layout(nrow = 3, ncol = 2, 
-                        widths = unit(c(0.05, 1), "null"))))
+#grid.newpage()
+#pushViewport(viewport(layout = 
+#                        grid.layout(nrow = 3, ncol = 2, 
+#                        widths = unit(c(0.05, 1), "null"))))
 
-print(vz, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
-print(vc, vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
+#print(vz, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+#print(vc, vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
 
-print(ssvz, vp = viewport(layout.pos.row = 4, layout.pos.col = 2))
-print(ssvc, vp = viewport(layout.pos.row = 5, layout.pos.col = 2))
-print(htyp, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+#print(ssvz, vp = viewport(layout.pos.row = 4, layout.pos.col = 2))
+#print(ssvc, vp = viewport(layout.pos.row = 5, layout.pos.col = 2))
+#print(htyp, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
 
-grid.text("A)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("B)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-grid.text("C)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
+#grid.text("A)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+#grid.text("B)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+#grid.text("C)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
    
-```
+#```
 
 
 
@@ -343,10 +348,10 @@ grid.text("C)", hjust=-0.25, vjust=-5.5, vp = viewport(layout.pos.row = 3, layou
 
 
 
-Model diagnostics.  This is model 1 run seperately for each group, as suggested by Derek.
+#Model diagnostics.  This is model 1 run seperately for each group, as suggested by Derek.
 
 
-```{r}
+#```{r}
 load("/home/lex/Desktop/vacc-affect-abs-model1-PSonly.RData")
 
 vacc_modelPS <- vacc_model
@@ -358,11 +363,11 @@ load("/home/lex/Desktop/vacc-affect-abs-model1-VAonly.RData")
 vacc_modelVA <- vacc_model
 
 summary(vacc_modelVA)     
-```
+#```
 
-Make some figures of the results.  
+#Make some figures of the results.  
 
-```{r}
+#```{r}
 vac <- summary(vacc_modelVA)
 
 vac <- data.frame(vac$solutions)
@@ -404,5 +409,5 @@ ggplot(vac, aes(x = predictors, y = post.mean)) +
   geom_hline(aes(yintercept=0), lty=2) +           
   labs(y = "95% CI", x = NULL) +                 
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold"))   
-```
+#```
 
