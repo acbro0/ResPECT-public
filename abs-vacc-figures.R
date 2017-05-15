@@ -23,6 +23,7 @@ load("/home/lex/Desktop/policy-affect-vacc-model2.RData")
 
 summary(htype_model)     
 
+
 load("/home/lex/Desktop/vacc-affect-abs-model-hurdle-no-masterid-VAsubset.RData")
 
 summary(VAbsentModelhurd)
@@ -118,25 +119,25 @@ vc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
   labs(y = "Adjusted relative rate for number of days absent", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted relative rate of HCW absenteeism")+
   theme(panel.grid.minor=element_blank())+
   ylim(0.07, 2.4) +
-  annotate("text", x = 6.5, y = 0.1, label = "A)", size=5)
-  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
+  annotate("text", x = 8, y = 0.08, label = "D)", size=5) +
+  scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 vz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +                         
   theme_bw() + 
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Adjusted odds ratios for whether HCP took sick time", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
+  labs(y = "Adjusted odds ratio for whether HCP took any sick time", x = NULL) +                 
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW taking any sick time")+
   theme(panel.grid.minor=element_blank()) + 
   ylim(0.07, 2.4) +
-  annotate("text", x = 6.5, y = 0.1, label = "B)", size=5)
-  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
+  annotate("text", x = 7.5, y = 0.08, label = "B)", size=5) +
+  scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ####### This is for the VAsubset only
 
@@ -221,26 +222,26 @@ ssvc <- ggplot(vac_count, aes(x=predictors, y = exp(Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Adjusted relative rate for number of days absent - VA subset", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
+  labs(y = "Adjusted relative rate for number of days absent at non-mandatory sites", x = NULL) +                 
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted relative rate of HCW absenteeism")+
   theme(panel.grid.minor=element_blank())+
   ylim(0.07, 2.4) +
-  annotate("text", x = 6.5, y = 0.1, label = "C)", size=5)
-  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
+  annotate("text", x = 7, y = 0.08, label = "E)", size=5) +
+  scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ssvz <- ggplot(vac_zero, aes(x=predictors, y = exp(Estimate))) +                         
   theme_bw() + 
   geom_pointrange (aes (ymin = exp(Estimate-(1.96*Std..Error)), ymax = exp(Estimate+(1.96*Std..Error)))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Adjusted odds ratios for whether HCP took sick time - VA subset", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
+  labs(y = "Adjusted odds ratio for whether HCP at non-mandatory sites took any sick time", x = NULL) +                 
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW taking any sick time")+
   theme(panel.grid.minor=element_blank()) + 
   ylim(0.07, 2.4) +
-  annotate("text", x = 6.5, y = 0.1, label = "D)", size=5)
-  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
+  annotate("text", x = 7, y = 0.08, label = "C)", size=5) +
+  scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 #```
 
@@ -293,19 +294,19 @@ htyp <- ggplot(vac, aes(x=predictors, y = exp(vac$Estimate))) +
   geom_pointrange (aes (ymin = exp(Estimate-Std..Error), ymax = exp(Estimate+Std..Error))) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Adjusted odds ratios for HCP influenza vaccination", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=12,face="bold")) +
+  labs(y = "Adjusted odds ratio for HCP influenza vaccination", x = NULL) +                 
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Adjusted odds ratios for HCW influenza vaccination") +
   theme(panel.grid.minor=element_blank()) + 
   ylim(0.07, 2.4) +
-  annotate("text", x = 6.5, y = 0.1, label = "E)", size=5)
-  #scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
+  annotate("text", x = 6.5, y = 0.08, label = "A)", size=5) +
+  scale_y_log10(limits= c(0.07, 2.4), breaks=c(0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 2.0))
 
 ###formatting the figure
 
 library(gridExtra)
 
-grid.arrange(vc, vz, ssvc, ssvz, htyp, ncol=1)
+grid.arrange(htyp, vz, ssvz, vc, ssvc, ncol=1)
 
 options(digits=1)
 
@@ -387,7 +388,7 @@ ggplot(vac, aes(x = predictors, y = post.mean)) +
   coord_flip() +               
   geom_hline(aes(yintercept=0), lty=2) +           
   labs(y = "95% CI", x = NULL) +                 
-  theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold"))   
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=14,face="bold"))   
 
 vac <- summary(vacc_modelPS)
 

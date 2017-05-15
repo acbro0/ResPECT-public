@@ -60,6 +60,7 @@ A <- append(rep(8, nrow(chco)-length(A)), A)
 
 chco$year <- as.factor(rev(A))
 
+
 tot <- chco %>% group_by(year) %>% summarise(total_cases=sum(Cases)) #total cases per year
 
 alertcases <- chco %>% filter(alertperiod==TRUE) %>% group_by(year) %>% 
@@ -224,15 +225,43 @@ require(gridExtra)
 
 grid.arrange(datetrig,threstrig)
 
+######################################
+##### MODEL FORMULATION ##############
+######################################
+
 #model formulation
 
+#real data
 ##load the data
-chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
+fluA$Date <- ymd(fluA$Date)
+fluA <- arrange(fluA, Date)
 
-chco$Date <- ymd(chco$Date)
+fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+                 stringsAsFactors=F)
+fluB$Date <- ymd(fluB$Date)
+fluB <- arrange(fluB, Date)
 
-chco <- arrange(chco, Date)
+RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+                stringsAsFactors=F)
+RSV$Date <- ymd(RSV$Date)
+RSV <- arrange(RSV, Date)
+
+Cases <- fluA$Cases + fluB$Cases + RSV$Cases
+Date <- fluA$Date
+
+data <- data.frame(Date, Cases)
+fulldata <- data
+
+
+##load the data
+#chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+#                 stringsAsFactors=F)
+
+#chco$Date <- ymd(chco$Date)
+
+chco <- arrange(fulldata, Date)
 
 #train <- filter(chco, Date<ymd("2010-07-01"))
 
@@ -267,7 +296,7 @@ res$se
 onesteppred <- oneStepAhead(res, nrow(chco)-1, type="rolling",
              which.start="current", verbose=FALSE)
 
-modelpredict <- data.frame(test, rev(onesteppred$pred[1:121]), rev(onesteppred$observed[1:121]))
+#modelpredict <- data.frame(test, rev(onesteppred$pred), rev(onesteppred$observed))
 
 colnames(modelpredict)[3:4] <- c("predicted", "observed")
 
@@ -395,13 +424,45 @@ grid.arrange(
 
 all <- read.csv("~/Desktop/applied-ALERT-data/chco.csv", stringsAsFactors = F)
 
-bugnames <- colnames(all[2:12])
 
-all$date <- mdy(all$Date..Month.Year.)
+##alternatively, use the following.
+#real data
+##load the data
+fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+                 stringsAsFactors=F)
+fluA$Date <- ymd(fluA$Date)
+fluA <- arrange(fluA, Date)
 
-all <- arrange(all, by=date)
+fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+                 stringsAsFactors=F)
+fluB$Date <- ymd(fluB$Date)
+fluB <- arrange(fluB, Date)
+
+RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+                stringsAsFactors=F)
+RSV$Date <- ymd(RSV$Date)
+RSV <- arrange(RSV, Date)
+
+Cases <- fluA$Cases + fluB$Cases + RSV$Cases
+Date <- fluA$Date
+
+data <- data.frame(Date, Cases)
+all <- data
+
+
+
+#bugnames <- colnames(all[2:4])
+
+#all <- all[1:4]
+
+#all$date <- mdy(all$Date..Month.Year.)
+
+library(dplyr)
+all <- arrange(all, by=Date)
 
 all$state <- 0
+
+
 
 holder <- list()
 
@@ -410,25 +471,35 @@ f.end <- addSeason2formula(f = ~ 1+t, S=1, period=52)
 model1 <- list(ar = list(f = ~ 1), end = list(f =f.end),
                family = "NegBinM", subset=2:469)
 
-for (i in 2:12){
-  print(i)
+#RSVDisProg <- create.disProg(week = 1:nrow(all), 
+#                            observed = all$Cases,
+#                            state = all$state, start = c(2001, 35))
+
+#for (i in 2:12){
+#  print(i)
+  
   RSVDisProg <- create.disProg(week = 1:nrow(all), 
-                             observed = as.matrix(all[i]),
+                             observed = as.matrix(all[2]),
                              state = all$state, start = c(2001, 35))# convert to sts class
   rsv <- disProg2sts(RSVDisProg)# convert to sts class
-  # run model
+#  # run model
   rsv_res <- hhh4(rsv, model1)
-  j <- as.integer(i-1)
-  holder[[j]] <- rsv_res$coefficients
-}
+#  j <- as.integer(i-1)
+  holder <- rsv_res$coefficients
+#}
 
 all <- data.frame(data.table::rbindlist(lapply(holder,as.list)))
 
-rownames(all) <- bugnames
+colnames(all) <- "coefficients derived from CHCO dataset"
 
-#print(xtable(all, type="html"))
+coefnames <- names(holder)
+#rownames(all) <- bugnames
 
-coefnames <- colnames(all)
+
+
+print(xtable(all, type="html"))
+
+
 
 holder <- list()
 
@@ -450,14 +521,16 @@ for (i in 1:length(ranges)){
 
 names(holder) <- coefnames
 
-coefs <- res$coefficients
+coefs <- rsv_res$coefficients
 
 simulations <- list()
 
-dates <- chco$Date
+#dates <- chco$Date
+
+
 
 #this is for when there is a firstMonth error. It will be filtered in the following steps.
-filler <- (createALERT(chco, firstMonth=9))
+filler <- (createALERT(data, firstMonth=9))
 
 get_stats <- function (j, params) {
   result <- try(createALERT(j, firstMonth=9))
@@ -483,6 +556,7 @@ get_stats <- function (j, params) {
   return(alert_summaries)
 }
 
+
 #choose the number of simulations to perform
 
 snum <- 10
@@ -490,6 +564,7 @@ snum <- 10
 #create the empty data.frame to allocate memory.
 
 num <- (length(holder)*length(holder[[1]])*snum)
+
 
 alertstats2 <- data.frame(threshold=rep(NA, num),
                           median.dur=rep(NA, num),
@@ -500,13 +575,12 @@ alertstats2 <- data.frame(threshold=rep(NA, num),
 
 #fill the data.frame using the power of indexing
 
-for(i in 1:length(holder)){
-  for (j in 1:length(holder[[i]])){
-    print(c(i, j))
+  for (j in 1:length(holder)){
+    print(c(j))
     params <- c(names(holder)[i], holder[[i]][[j]])
     toycoef <- coefs
     toycoef[i] <- holder[[i]][[j]]
-    res2 <- hhh4(flu, model1)
+    res2 <- hhh4(rsv, model1)
     res2$coefficients <- toycoef
     simulation <- as.vector(simulate(res2, nsim=snum, seed=NULL,
                                            y.start=NULL, simplify=TRUE))
