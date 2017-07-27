@@ -167,28 +167,28 @@ datetrig <- ggplot() + #this is the real dates
   geom_bar(aes(y=chco$Cases, x=chco$Date), stat="identity") +
   geom_rect(aes(xmin = dates$startDate[1], 
                 xmax = dates$endDate[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[2], 
                 xmax = dates$endDate[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[3], 
                 xmax = dates$endDate[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[4], 
                 xmax = dates$endDate[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[5], 
                 xmax = dates$endDate[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[6], 
                 xmax = dates$endDate[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[7], 
                 xmax = dates$endDate[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[8], 
                 xmax = dates$endDate[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) 
+                ymin = -40, ymax = -15), alpha = 0.2) 
 
 threstrig <- ggplot() + #this is the ALERT dates
   theme_classic() +
@@ -198,28 +198,28 @@ threstrig <- ggplot() + #this is the ALERT dates
              alpha=0.5, show.legend = FALSE) +
   geom_rect(aes(xmin = ALERT_dates$xstart[1], 
                 xmax = ALERT_dates$xstop[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[2], 
                 xmax = ALERT_dates$xstop[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[3], 
                 xmax = ALERT_dates$xstop[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[4], 
                 xmax = ALERT_dates$xstop[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[5], 
                 xmax = ALERT_dates$xstop[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[6], 
                 xmax = ALERT_dates$xstop[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[7], 
                 xmax = ALERT_dates$xstop[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[8], 
                 xmax = ALERT_dates$xstop[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) 
+                ymin = -40, ymax = -15), alpha = 0.2) 
 
 require(gridExtra)
 

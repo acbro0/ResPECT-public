@@ -45,42 +45,25 @@ dates <- filter(dates, endDate <= tail(data$Date, 1)+weeks(6))
 
 rawdat <- ggplot(testingdata, aes(x=Date, y=Cases)) +
   geom_bar(stat="identity") +
+  scale_x_date(limits=c(as.Date("2001-07-07"), as.Date("2005-01-01")))+
   theme_classic()+
 # ggtitle("Training years") +
   geom_hline(aes(yintercept=25), linetype="dashed", 
              alpha=0.5, show.legend = FALSE) +
   theme(axis.title.y=element_blank())
   
-
-
-  ggplot(trainingdata, aes(x=Date, y=Cases)) +
-  geom_bar(stat="identity") +
-  theme_classic()+
-  ggtitle("Testing years") 
-
-density(trainingdata$Cases)
-
 ##zeros are dropped because that's what ALERT does
 dens <- ggplot(data=filter(testingdata, Cases>0), 
        aes(filter(testingdata, Cases>0)$Cases)) +
   theme_classic()+
-  geom_histogram(binwidth=1) +
+  geom_density(fill="grey") +
   coord_flip() +
   geom_vline(aes(xintercept=25), linetype="dashed", 
              alpha=0.5, show.legend = FALSE) +
   theme(axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
         axis.title.y=element_blank()) +
-  labs(y = "Count") 
-
-dens <- density(filter(testingdata, Cases>0)$Cases, c(0.1, 0.3, 0.6))
-df <- data.frame(x=dens$x, y=dens$y)
-probs <- c(0.1, 0.20, 0.5, 0.75, 0.9)
-quantiles <- quantile(df$x, prob=probs)
-df$quant <- factor(findInterval(x=df$x, vec=probs))
-ggplot(df, aes(x,y)) + geom_line() + geom_ribbon(aes(ymin=0, ymax=y, fill=quant))
-
-quantile(filter(testingdata, Cases>0)$Cases, c(0.1, 0.3, 0.6))
+  labs(y = "Density") 
 
 grid.arrange(rawdat, dens, ncol=2, left="LCRI incidence")
 
@@ -220,32 +203,33 @@ ymin <- -2
 
 datetrig <- ggplot() + #this is the real dates
   theme_classic() +
+  ylim(-40, 150) +
   labs(y = "LCRI", x = "Actual intervention periods") +
   geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), stat="identity") +
   geom_rect(aes(xmin = dates$startDate[1], 
                 xmax = dates$endDate[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[2], 
                 xmax = dates$endDate[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[3], 
                 xmax = dates$endDate[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[4], 
                 xmax = dates$endDate[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[5], 
                 xmax = dates$endDate[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[6], 
                 xmax = dates$endDate[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[7], 
                 xmax = dates$endDate[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = dates$startDate[8], 
                 xmax = dates$endDate[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -261,52 +245,52 @@ alerttrain$out
 
 ##Here's where I left off
 
-threshold <- 1
-trainingdata$smooththres <- ifelse (lowess(trainingdata$Cases, f=0.001)$y>=threshold, TRUE, FALSE)
-ALERT_dates1 <- trainingdata %>% group_by(year, smooththres) %>% arrange(Date) %>%
-  summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
-  data.frame() %>% 
-  filter(smooththres==TRUE) %>% select(-year, -smooththres)
+#threshold <- 1
+#trainingdata$smooththres <- ifelse (lowess(trainingdata$Cases, f=0.001)$y>=threshold, TRUE, FALSE)
+#ALERT_dates1 <- trainingdata %>% group_by(year, smooththres) %>% arrange(Date) %>%
+#  summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
+#  data.frame() %>% 
+#  filter(smooththres==TRUE) %>% select(-year, -smooththres)
 
-threstrig1 <- ggplot() + #this is the ALERT dates
-  theme_classic() +
-  labs(y = "Influenza A cases", x = "Threshold-based intervention periods") +
-  geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), stat="identity") +
-  #geom_hline(aes(yintercept=threshold), linetype="dashed", 
-  #           alpha=0.5, show.legend = FALSE) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[1], 
-                xmax = ALERT_dates1$xstop[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[2], 
-                xmax = ALERT_dates1$xstop[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[3], 
-                xmax = ALERT_dates1$xstop[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[4], 
-                xmax = ALERT_dates1$xstop[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[5], 
-                xmax = ALERT_dates1$xstop[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[6], 
-                xmax = ALERT_dates1$xstop[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[7], 
-                xmax = ALERT_dates1$xstop[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates1$xstart[8], 
-                xmax = ALERT_dates1$xstop[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.title.y=element_blank()
-        )+
-  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "B)", size=5)
+#threstrig1 <- ggplot() + #this is the ALERT dates
+#  theme_classic() +
+#  labs(y = "Influenza A cases", x = "Threshold-based intervention periods") +
+#  geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), stat="identity") +
+#  #geom_hline(aes(yintercept=threshold), linetype="dashed", 
+#  #           alpha=0.5, show.legend = FALSE) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[1], 
+#                xmax = ALERT_dates1$xstop[1], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[2], 
+#                xmax = ALERT_dates1$xstop[2], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[3], 
+#                xmax = ALERT_dates1$xstop[3], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[4], 
+#                xmax = ALERT_dates1$xstop[4], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[5], 
+#                xmax = ALERT_dates1$xstop[5], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[6], 
+#                xmax = ALERT_dates1$xstop[6], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[7], 
+#                xmax = ALERT_dates1$xstop[7], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  geom_rect(aes(xmin = ALERT_dates1$xstart[8], 
+#                xmax = ALERT_dates1$xstop[8], 
+#                ymin = -40, ymax = -15), alpha = 0.2) +
+#  theme(axis.title.x=element_blank(),
+#        axis.text.x=element_blank(),
+#        axis.ticks.x=element_blank(),
+#        axis.title.y=element_blank()
+#        )+
+#  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "B)", size=5)
 
 
-##threshold 4
+##threshold 3
 
 
 threshold <- 3
@@ -318,39 +302,40 @@ ALERT_dates3 <- trainingdata %>% group_by(year, smooththres) %>% arrange(Date) %
 
 threstrig3 <- ggplot() + #this is the ALERT dates
   theme_classic() +
+  ylim(-40, 150) +
   labs(y = "Influenza A cases", x = "Threshold-based intervention periods") +
   geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), stat="identity") +
   #geom_hline(aes(yintercept=threshold), linetype="dashed", 
   #           alpha=0.5, show.legend = FALSE) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[1], 
                 xmax = ALERT_dates3$xstop[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[2], 
                 xmax = ALERT_dates3$xstop[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[3], 
                 xmax = ALERT_dates3$xstop[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[4], 
                 xmax = ALERT_dates3$xstop[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[5], 
                 xmax = ALERT_dates3$xstop[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[6], 
                 xmax = ALERT_dates3$xstop[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[7], 
                 xmax = ALERT_dates3$xstop[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates3$xstart[8], 
                 xmax = ALERT_dates3$xstop[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.y=element_blank()) +
-  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "C)", size=5)
+  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "B)", size=5)
 
 ####threhold 12
 
@@ -363,39 +348,40 @@ ALERT_dates12 <- trainingdata %>% group_by(year, smooththres) %>% arrange(Date) 
 
 threstrig12 <- ggplot() + #this is the ALERT dates
   theme_classic() +
+  ylim(-40, 150) +
   labs(y = "Influenza A cases", x = "Threshold-based intervention periods") +
   geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), stat="identity") +
   #geom_hline(aes(yintercept=threshold), linetype="dashed", 
   #           alpha=0.5, show.legend = FALSE) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[1], 
                 xmax = ALERT_dates12$xstop[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[2], 
                 xmax = ALERT_dates12$xstop[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[3], 
                 xmax = ALERT_dates12$xstop[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[4], 
                 xmax = ALERT_dates12$xstop[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[5], 
                 xmax = ALERT_dates12$xstop[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[6], 
                 xmax = ALERT_dates12$xstop[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[7], 
                 xmax = ALERT_dates12$xstop[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates12$xstart[8], 
                 xmax = ALERT_dates12$xstop[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.y=element_blank())+
-  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "D)", size=5)
+  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "C)", size=5)
 
 ####threhold 25
 
@@ -408,41 +394,42 @@ ALERT_dates25 <- trainingdata %>% group_by(year, smooththres) %>% arrange(Date) 
 
 threstrig25 <- ggplot() + #this is the ALERT dates
   theme_classic() +
+  ylim(-40, 150) +
   labs(y = "Influenza A cases", x = "Threshold-based intervention periods") +
   geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), stat="identity") +
 #  geom_hline(aes(yintercept=threshold), linetype="dashed", 
 #             alpha=0.5, show.legend = FALSE) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[1], 
                 xmax = ALERT_dates25$xstop[1], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[2], 
                 xmax = ALERT_dates25$xstop[2], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[3], 
                 xmax = ALERT_dates25$xstop[3], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[4], 
                 xmax = ALERT_dates25$xstop[4], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[5], 
                 xmax = ALERT_dates25$xstop[5], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[6], 
                 xmax = ALERT_dates25$xstop[6], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[7], 
                 xmax = ALERT_dates25$xstop[7], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates25$xstart[8], 
                 xmax = ALERT_dates25$xstop[8], 
-                ymin = ymin, ymax = Inf), alpha = 0.2) +
+                ymin = -40, ymax = -15), alpha = 0.2) +
   theme(axis.title.y=element_blank(),
         axis.title.x=element_blank()) +
-  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "E)", size=5)
+  annotate("text", x = as.Date("2004-10-05"), y = 140, label = "D)", size=5)
 
 
 library(gridExtra)
 
-grid.arrange(datetrig,threstrig1, threstrig3, threstrig12, threstrig25, ncol=1, left="LCRI incidence", 
+grid.arrange(datetrig, threstrig3, threstrig12, threstrig25, ncol=1, left="LCRI incidence", 
              bottom="Date")
 

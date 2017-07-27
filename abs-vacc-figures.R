@@ -45,10 +45,10 @@ vac_zero$predictors <- rownames(vac_zero)
 vac_count <- filter(vac_count, predictors != "(Intercept)")
 vac_zero <- filter(vac_zero, predictors != "(Intercept)")
 
-vac_count$predictors <- c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_count$predictors <- c("2013-2014 vs. 2012-2013", 
+                          "2014-2015 vs. 2012-2013", 
+                          "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                          "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -68,10 +68,10 @@ vac_count$Estimate[vac_count$predictors=="age (10 year increments)"] <-
 vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"] <- 
   vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"]*10
 
-vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("2013-2014 vs. 2012-2013", 
+                                                                  "2014-2015 vs. 2012-2013", 
+                                                                  "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                                                                  "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -79,10 +79,10 @@ vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("2014 vs. 2013
                    "age (10 year increments)", 
                     "non-mandatory sites vs. mandatory sites")))
 
-vac_zero$predictors <-  c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_zero$predictors <-  c("2013-2014 vs. 2012-2013", 
+                          "2014-2015 vs. 2012-2013", 
+                          "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                          "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -102,10 +102,10 @@ vac_zero$Estimate[vac_zero$predictors=="age (10 year increments)"] <-
 vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"] <- 
   vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"]*10
 
-vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("2013-2014 vs. 2012-2013", 
+                                                                "2014-2015 vs. 2012-2013", 
+                                                                "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                                                                "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -153,10 +153,10 @@ vac_zero$predictors <- rownames(vac_zero)
 vac_count <- filter(vac_count, predictors != "(Intercept)")
 vac_zero <- filter(vac_zero, predictors != "(Intercept)")
 
-vac_count$predictors <- c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_count$predictors <- c("2013-2014 vs. 2012-2013", 
+                          "2014-2015 vs. 2012-2013", 
+                          "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                          "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -175,20 +175,20 @@ vac_count$Estimate[vac_count$predictors=="age (10 year increments)"] <-
 vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"] <- 
   vac_count$Std..Error[vac_count$predictors=="age (10 year increments)"]*10
 
-vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_count$predictors <- factor(vac_count$predictors, levels=rev(c("2013-2014 vs. 2012-2013", 
+                                                                  "2014-2015 vs. 2012-2013", 
+                                                                  "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                                                                  "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
                     "URI exposure (10% increments)", 
                    "age (10 year increments)")))
 
-vac_zero$predictors <-  c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_zero$predictors <-  c("2013-2014 vs. 2012-2013", 
+                          "2014-2015 vs. 2012-2013", 
+                          "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                          "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -207,10 +207,10 @@ vac_zero$Estimate[vac_zero$predictors=="age (10 year increments)"] <-
 vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"] <- 
   vac_zero$Std..Error[vac_zero$predictors=="age (10 year increments)"]*10
 
-vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("2014 vs. 2013", 
-                          "2015 vs. 2013", 
-                          "2013 & 2014 vaccinated vs. unvaccinated",
-                          "2015 vaccinated vs. unvaccinated",
+vac_zero$predictors <- factor(vac_zero$predictors, levels=rev(c("2013-2014 vs. 2012-2013", 
+                          "2014-2015 vs. 2012-2013", 
+                          "2012-2013 & 2013-2014 vaccinated vs. unvaccinated",
+                          "2014-2015 vaccinated vs. unvaccinated",
                           "male vs. female", 
                           "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -257,8 +257,8 @@ vac$predictors <- rownames(vac)
 
 vac <- filter(vac, predictors != "(Intercept)")
 
-vac$predictors <- c("2014 vs. 2013", 
-                    "2015 vs. 2013", 
+vac$predictors <- c("2013-2014 vs. 2012-2013", 
+                    "2014-2015 vs. 2012-2013", 
                     "male vs. female",
                     "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
@@ -280,8 +280,8 @@ vac$Estimate[vac$predictors=="age (10 year increments)"] <-
 vac$Std..Error[vac$predictors=="age (10 year increments)"] <- 
   vac$Std..Error[vac$predictors=="age (10 year increments)"]*10
 
-vac$predictors <- factor(vac$predictors, levels=rev(c("2014 vs. 2013", 
-                    "2015 vs. 2013", 
+vac$predictors <- factor(vac$predictors, levels=rev(c("2013-2014 vs. 2012-2013", 
+                    "2014-2015 vs. 2012-2013", 
                     "male vs. female",
                     "children under 5 in household: yes vs. no",
                     "children under 5 in household: no report vs. no",
