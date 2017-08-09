@@ -1,30 +1,43 @@
 ###  homemade functions for use with ALERT
 
-get_stats <- function (j, params, firstMonth) {
-  result <- try(createALERT(j, firstMonth=firstMonth))
+###choose the largest threshold with peaks captured>85%
+pick_best85 <- function (chosen_vec) {
+  chosen_vec2 <- chosen_vec[chosen_vec[, "median.pct.cases.captured"] > 85.0,,drop=FALSE]
+  if(nrow(chosen_vec2)<1){
+    chosen_vec3 <- pick_best_other(chosen_vec)
+    attr(chosen_vec3, "success") <- FALSE
+  } else {
+  chosen_vec3 <- chosen_vec2[chosen_vec2[, "threshold"] == max(chosen_vec2[, "threshold"], 
+                                                               na.rm = TRUE),]
+  attr(chosen_vec3, "success") <- TRUE
+  }
+  return(chosen_vec3)
+}
+
+pick_best_other <- function(chosen_vec){
+  chosen_vec2 <- chosen_vec[chosen_vec[, "min.pct.cases.captured"] == max(chosen_vec[, "min.pct.cases.captured"], 
+                                                                          na.rm = TRUE),, drop=FALSE]
+  chosen_vec3 <- chosen_vec2[chosen_vec2[, "threshold"] == max(chosen_vec2[, "threshold"], 
+                                                               na.rm = TRUE),]
+  return(chosen_vec3)
+}
+
+get_stats <- function (j, params=params, firstMonth=firstMonth_value, minWeeks=minWeeks_value) {
+  result <- try(createALERT(j, firstMonth=firstMonth_value, minWeeks=minWeeks_value, target.pct=0.85))
+  #print(result$out)
   if (class(result)=='try-error') {
-    alert_stats <- filler$out[,1:8]
-    alert_summaries <- (c(apply(alert_stats,
-                                2, function (x) {max(x)*0}), params))
-    success <- FALSE
+    print("error 1: data must run in createALERT")
   } else {
     alert_stats <- result$out[,1:8]
-    alert_summaries <- try((c(apply(alert_stats,
-                                    2, function (x) {median(x)}), params)))
-    if (class(alert_summaries)=='try-error'){
-      alert_stats <- filler$out[,1:8]
-      alert_summaries <- (c(apply(alert_stats,
-                                  2, function (x) {max(x)*0}), params))
-      success <- FALSE
-    } else {
-      success <- TRUE
-    }
+      best_row <- pick_best85(alert_stats)
+    alert_summaries <- c(best_row, attr(best_row, "success"), params)
   }
-  alert_summaries['success'] <- success
   return(alert_summaries)
 }
 
-### chose a threshold and apply across a dataset.
+### choose a threshold and apply across a dataset.
+
+##FIXME 
 
 thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, whichThreshold=4, k=0, target.pct=NULL, caseColumn='Cases', lastDate=NULL) {
   ## check for correct column headers
@@ -32,7 +45,7 @@ thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, w
     stop("data needs Date columns.")
   if( !(caseColumn %in% colnames(data)) )
     stop(paste("column named", caseColumn, "not found in data."))
-  
+    
   ## subset data if required
   if(!is.null(lastDate))
     data <- subset(data, Date<as.Date(lastDate))
@@ -41,9 +54,9 @@ thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, w
   years <- unique(year(data$Date))
   idxs <- vector("list", length(years)-1) 
   for(i in 1:length(idxs)) {
-    startDate <- as.Date(paste0(years[i], "-", firstMonth, "-01"))
-    endDate <- as.Date(paste0(years[i]+1, "-", firstMonth, "-01"))
-    idxs[[i]] <- which(data$Date >= startDate & data$Date < endDate)   
+    startDate2 <- as.Date(paste0(years[i], "-", firstMonth, "-01"))
+    endDate2 <- as.Date(paste0(years[i]+1, "-", firstMonth, "-01"))
+    idxs[[i]] <- which(data$Date >= startDate2 & data$Date < endDate2)   
   }
   
   ## threshold to test
@@ -64,13 +77,13 @@ thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, w
   details <- vector("list", length(thresholds))
   ## run a sample to get dim and dimnames
   samp.num <- ifelse(length(idxs[[1]])==0, 2, 1) # Used for evalALERT, if first season missing (i.e is test season) then use second season for sampleRun
-  sampleRun <- applyALERT(data[idxs[[samp.num]],], threshold=thresholds[1], k=k, lag=lag, minWeeks=minWeeks, target.pct=target.pct, caseColumn=caseColumn)
+  sampleRun <- special_applyALERT(data[idxs[[samp.num]],], threshold=thresholds[1], k=k, lag=lag, minWeeks=minWeeks, target.pct=target.pct, caseColumn=caseColumn)
   for(i in 1:length(thresholds)){
     tmp <- matrix(NA, nrow=length(idxs), ncol=length(sampleRun))
     colnames(tmp) <- names(sampleRun)
     for(j in 1:length(idxs)){
       if(length(idxs[[j]])==0) next # Used for evalALERT, skips missing (test) season
-      tmp[j,] <- applyALERT(data[idxs[[j]],], threshold=thresholds[i], k=k, lag=lag, minWeeks=minWeeks, target.pct=target.pct, caseColumn=caseColumn)
+      tmp[j,] <- special_applyALERT(data[idxs[[j]],], threshold=thresholds[i], k=k, lag=lag, minWeeks=minWeeks, target.pct=target.pct, caseColumn=caseColumn)
     }
     details[[i]] <- tmp
     out[i,"threshold"] <- thresholds[i] ## threshold used
@@ -85,3 +98,91 @@ thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, w
   }
   return(list(out=out, details=details))
 }
+
+#########################################
+########   special applyALERT   ############
+#########################################
+
+special_applyALERT <- function (data, threshold, k = 0, lag = 7, minWeeks = 8, target.pct = NULL, 
+          plot = FALSE, caseColumn = "Cases") 
+{
+  if (any(data[, caseColumn] >= threshold) == FALSE) {
+    message(paste("In the season starting in", year(data$Date[1]), 
+                  "the threshold of", threshold, "was not hit."))
+    cnames <- c("tot.cases", "duration", "ALERT.cases", "ALERT.cases.pct", 
+                "peak.captured", "peak.ext.captured", "low.weeks.incl", "start", "end",
+                "duration.diff")
+    out <- rep(0, length(cnames))
+    names(out) <- cnames
+    out[c("tot.cases")] <- sum(data[, caseColumn])
+    out[c("duration.diff")] <- NA
+    return(out)
+  }
+  idxHitDate <- min(which(data[, caseColumn] >= threshold))
+  hitDate <- data[idxHitDate, "Date"]
+  idxStartDate <- idxHitDate + ceiling(lag/7)
+  startDate <- data[idxStartDate, "Date"]
+  minEndIdx <- idxStartDate + minWeeks - 1
+  if (minEndIdx > nrow(data)) {
+    cnames <- c("tot.cases", "duration", "ALERT.cases", "ALERT.cases.pct", 
+                "peak.captured", "peak.ext.captured", "low.weeks.incl", "start", "end",
+                "duration.diff")
+    out <- rep(NA, length(cnames))
+    names(out) <- cnames
+    out["tot.cases"] <- sum(data[, caseColumn])
+    return(out)
+  }
+  idxEndDate <- NA
+  i <- minEndIdx - 1
+  while (is.na(idxEndDate)) {
+    i <- i + 1
+    if (is.na(data[i, caseColumn])) 
+      next
+    if (data[i, caseColumn] < threshold) 
+      idxEndDate <- i
+    if (i == nrow(data)) 
+      break
+  }
+  endDate <- data[idxEndDate, "Date"]
+  onALERT <- rep(0, nrow(data))
+  if (is.na(idxEndDate)) {
+    cnames <- c("tot.cases", "duration", "ALERT.cases", "ALERT.cases.pct", 
+                "peak.captured", "peak.ext.captured", "low.weeks.incl", "start", "end",
+                "duration.diff")
+    out <- rep(NA, length(cnames))
+    names(out) <- cnames
+    out["tot.cases"] <- sum(data[, caseColumn])
+    return(out)
+  }
+  onALERT[idxStartDate:idxEndDate] <- 1
+  idxPeak <- min(which(data[, caseColumn] == max(data[, caseColumn], 
+                                                 na.rm = TRUE)))
+  if (!is.null(target.pct)) {
+    postcast <- postcastALERT(data, target.pct, caseColumn = caseColumn)
+  }
+  cnames <- c("tot.cases", "duration", "ALERT.cases", "ALERT.cases.pct", 
+              "peak.captured", "peak.ext.captured", "low.weeks.incl", 
+              "start", "end")
+  out <- rep(NA, length(cnames))
+  names(out) <- cnames
+  out["tot.cases"] <- sum(data[, caseColumn])
+  out["duration"] <- idxEndDate - idxStartDate + 1
+  out["ALERT.cases"] <- sum(data[, caseColumn] * onALERT)
+  out["ALERT.cases.pct"] <- out["ALERT.cases"]/out["tot.cases"]
+  out["peak.captured"] <- idxPeak >= idxStartDate & idxPeak <= 
+    idxEndDate
+  out["peak.ext.captured"] <- idxPeak >= (idxStartDate + k) & 
+    idxPeak <= (idxEndDate - k)
+  out["low.weeks.incl"] <- sum(data[idxStartDate:idxEndDate, 
+                                    caseColumn] < threshold)
+  out["start"] <- startDate
+  out["end"] <- endDate
+  if (!is.null(target.pct)) 
+    out <- c(out, duration.diff = unname(out["duration"] - 
+                                           postcast["duration"]))
+  else out <- c(out, duration.diff = NA)
+  if (plot) 
+    message("Plot option not implemented.")
+  return(out)
+}
+

@@ -2,7 +2,7 @@
 source("~/Documents/ResPECT-public/ALERT-simulations-fxns.R")
 
 library("dplyr")
-library("lubridate")
+require(lubridate); year <- lubridate::year
 
 
 dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
@@ -199,17 +199,9 @@ alertstats2 <- data.frame(threshold=rep(NA, num),
                           parameter=rep(NA, num),
                           value=rep(NA, num),
                           success=rep(NA, num),
-                          firstMonth=rep(NA, num))
+                          firstMonth=rep(NA, num),
+                          sim_number=rep(NA, num))
 
-
-alerttest <- data.frame(test.threshold=rep(NA, num),
-                          test.median.dur=rep(NA, num),
-                          test.median.pct.cases.captured=rep(NA, num),
-                        test.min.pct.cases.captured=rep(NA, num),
-                        test.max.pct.cases.captured=rep(NA, num),
-                          test.pct.peaks.captured=rep(NA, num),
-                        test.pct.ext.peaks.captured=rep(NA, num), 
-                        test.mean.low.weeks.incl=rep(NA, num))
 
 
 ##Make a column with the changed values
@@ -239,34 +231,54 @@ for (i in 1:nrow(ranges)){
      for(k in 1:snum){
       simset <- data.frame(minisim[[k]], dates)
       colnames(simset) <- c("Cases", "Date")
+      simset$Date <- as.Date(simset$Date)
       write.csv(simset, file=paste("~/Desktop/applied-ALERT-data/simulated-data/", 
                                    ranges$param[i], ranges$value[i],
                                    "_sim#", k, ".csv", sep=""))
       simset_train <- simset[1:200,]
       simset_test <- simset[201:nrow(simset),]
       ##to get the FirstMonth
-      rho <- as.numeric(res2$coefficients[4])
-      omega <- as.numeric(res2$coefficients[5])
-      end.deriv <- function(t) 2*pi*rho*cos(2*pi*t)-2*pi*omega*sin(2*pi*t)
-      xmin <- optimize(f=end.deriv, lower=0, upper=1, maximum=FALSE)
-      startM <- month(data$Date[round(xmin$minimum*52)])
-      alertstats2[((i-1)*snum)+k,] <- c(get_stats(simset_train, firstMonth=startM,
-                                          params=params), startM)
-      #print(alertstats2[((i-1)*snum)+k,])
-      alerttest[((i-1)*snum)+k,] <- thresholdtestALERT(simset_test, 
-                                                       whichThreshold=as.numeric(alertstats2[((i-1)*snum)+k,1]),
-                                                       firstMonth=startM)$out
-      #print(alerttest[((i-1)*snum)+k,])
+      gamma <- as.numeric(res2$coefficients[4])
+      delta <- as.numeric(res2$coefficients[5])
+      end.fxn <- function(y) gamma*sin(2*pi*y) + delta*cos(2*pi*y)
+      xmax <- optimize(f=end.fxn, lower=0, upper=1, maximum=TRUE)$maximum
+      xmin <- optimize(f=end.fxn, lower=0, upper=1, maximum=FALSE)$minimum
+      halfcurve_value <- ifelse (round((xmax*52-xmin*52)/2 + (xmin*52))>0, 
+                                round((xmax*52-xmin*52)/2 + (xmin*52)), round((xmin*52-xmax*52)/2 + (xmax*52)))
+      firstMonth_value <- month(simset_train$Date[round(xmin*52+halfcurve_value)])
+      minWeeks_value <- 8
+      alertstats2[((i-1)*snum)+k,] <- c(get_stats(simset_train, firstMonth=firstMonth_value,
+                                                  minWeeks=minWeeks_value,
+                                          params=params), firstMonth_value, k)
+     # print(alertstats2[((i-1)*snum)+k,])
      }
 }
 
-alertstats <- data.frame(alertstats2, alerttest)
+alertstats3 <- filter(alertstats2, !is.na(threshold))
 
-alertstats <- alertstats %>% group_by(parameter, value) %>% 
-  filter(median.pct.cases.captured>85) %>% group_by(parameter, value) %>% 
-         filter(median.dur==min(median.dur)) %>% data.frame()
+success_num <- nrow(alertstats3)
 
-#filter(alertstats, threshold!=test.threshold)
+alerttest <- data.frame(test.threshold=rep(NA, success_num),
+                        test.median.dur=rep(NA, success_num),
+                        test.median.pct.cases.captured=rep(NA, success_num),
+                        test.min.pct.cases.captured=rep(NA, success_num),
+                        test.max.pct.cases.captured=rep(NA, success_num),
+                        test.pct.peaks.captured=rep(NA, success_num),
+                        test.pct.ext.peaks.captured=rep(NA, success_num), 
+                        test.mean.low.weeks.incl=rep(NA, success_num))
+
+for (i in 1:nrow(alertstats3)){
+  alerttest[i,] <- thresholdtestALERT(simset_test,
+  whichThreshold=as.numeric(alertstats3[i,1]), firstMonth=firstMonth_value,
+  minWeeks = minWeeks_value)$out
+  print(alerttest[i,])
+}
+
+alertstats <- data.frame(alertstats3, alerttest)
+
+if(nrow(filter(alertstats, threshold!=test.threshold))>0){
+  stop("alertstats dataframe construction ERROR")
+}
 
 med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold), 
                         train.median.dur=as.numeric(median.dur),
@@ -274,7 +286,8 @@ med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold),
     test.median.pct.cases.captured=as.numeric(test.median.pct.cases.captured), 
     test.median.dur=as.numeric(test.median.dur),
     test.mean.low.weeks.incl=as.numeric(test.mean.low.weeks.incl),
-    mean.low.weeks.incl=as.numeric(mean.low.weeks.incl)) %>% 
+    mean.low.weeks.incl=as.numeric(mean.low.weeks.incl),
+    firstMonth=as.numeric(firstMonth)) %>% 
   filter(success==TRUE) %>% group_by(parameter, value) %>%
     summarise(test.median.pct.cases.captured=median(test.median.pct.cases.captured), 
             threshold=median(threshold),
@@ -282,7 +295,8 @@ med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold),
             train.median.dur=median(train.median.dur),
             median.pct.cases.captured = median(median.pct.cases.captured),
             median.test.low.weeks=median(test.mean.low.weeks.incl),
-            median.train.low.weeks=median(mean.low.weeks.incl)) %>%
+            median.train.low.weeks=median(mean.low.weeks.incl),
+            median.firstMonth=median(firstMonth)) %>%
   mutate(duration.diff=train.median.dur-test.median.dur,
          median.pct.diff=median.pct.cases.captured-test.median.pct.cases.captured,
          median.low.weeks.diff=median.train.low.weeks-median.test.low.weeks) %>%
@@ -292,10 +306,11 @@ med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold),
 ## med.stats has the collapsed results
 write.csv(med.stats, "~/Desktop/applied-ALERT-data/simulated-data/med_stats.csv")
 write.csv(alertstats2, "~/Desktop/applied-ALERT-data/simulated-data/alertstats2.csv")
+write.csv(alertstats3, "~/Desktop/applied-ALERT-data/simulated-data/alertstats3.csv")
 
 med.stats <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/med_stats.csv", stringsAsFactors = F)
 alertstats2 <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/alertstats2.csv", stringsAsFactors = F)
-
+alertstats3 <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/alertstats3.csv", stringsAsFactors = F)
 
 #it looks like ar.1, end.1, and end.t are going to be the most interesting.
 #maybe overdispersion?
@@ -390,28 +405,43 @@ med.lowweeks.diff.performance
 
 holder <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/gamma-1.31716908734946_sim#26.csv")
 
-threshold <- filter(med.stats, parameter=="gamma" & value==-1.31716908734946)$threshold
+first_Month <- filter(med.stats, parameter=="gamma" & value==-1.31716908734946)$median.firstMonth
+
+threshold <- round(filter(med.stats, parameter=="gamma" & value==-1.31716908734946)$threshold)
 
 ##make sure Dates are Dates
 holder$Date <- as.Date(holder$Date)
+
+thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = 5)
 
 ##is this an alert period?
 holder$smooththres <- ifelse (lowess(holder$Cases, f=0.001)$y>=threshold, TRUE, FALSE)
 
 ##make the year factor column
-A <- rep(1, times=52)
+A <- rep(1, times=39)
 for(i in 2:11){
   A <- append(rep(i, 52), A)
 }
 A <- append(rep(12, nrow(holder)-length(A)), A)
 holder$year <- as.factor(rev(A))
 
-ALERT_dates <- holder %>% group_by(year, smooththres) %>% arrange(Date) %>%
-  summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
+ALERT_dates <- holder %>% group_by(year, smooththres)%>% arrange(Date) %>% 
+   summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
   data.frame() %>% 
   filter(smooththres==TRUE) %>% select(-year, -smooththres)
 
 ymin <- -2
+
+ALERT_dates <- select(
+    data.frame(
+    thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = 9)$details), start, end)
+
+ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
+ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+
+ALERT_dates <- na.omit(ALERT_dates)
+
+colnames(ALERT_dates) <- c("xstart", "xstop")
 
 threstrig <- ggplot() + #this is the ALERT dates
   theme_classic() +
@@ -448,11 +478,7 @@ threstrig <- ggplot() + #this is the ALERT dates
                 ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[10], 
                 xmax = ALERT_dates$xstop[10], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[11], 
-                xmax = ALERT_dates$xstop[11], 
                 ymin = -40, ymax = -15), alpha = 0.2) 
- 
 threstrig 
 #gridExtra::grid.arrange(threstrig, performance, heights=c(1, 3))
 
