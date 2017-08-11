@@ -1,6 +1,7 @@
 ###  homemade functions for use with ALERT
 
-###choose the largest threshold with peaks captured>85%
+###choose the largest threshold with peaks captured>85% or
+## if peaks captured is <85%, call pick_best_other and success=FALSE
 pick_best85 <- function (chosen_vec) {
   chosen_vec2 <- chosen_vec[chosen_vec[, "median.pct.cases.captured"] > 85.0,,drop=FALSE]
   if(nrow(chosen_vec2)<1){
@@ -14,6 +15,8 @@ pick_best85 <- function (chosen_vec) {
   return(chosen_vec3)
 }
 
+## maximize the min.pct.cases.captured as an alternative
+#to median.pct.cases.captured>85%
 pick_best_other <- function(chosen_vec){
   chosen_vec2 <- chosen_vec[chosen_vec[, "min.pct.cases.captured"] == max(chosen_vec[, "min.pct.cases.captured"], 
                                                                           na.rm = TRUE),, drop=FALSE]
@@ -30,14 +33,12 @@ get_stats <- function (j, params=params, firstMonth=firstMonth_value, minWeeks=m
   } else {
     alert_stats <- result$out[,1:8]
       best_row <- pick_best85(alert_stats)
-    alert_summaries <- c(best_row, attr(best_row, "success"), params)
+    alert_summaries <- c(best_row, params, attr(best_row, "success"))
   }
   return(alert_summaries)
 }
 
 ### choose a threshold and apply across a dataset.
-
-##FIXME 
 
 thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, whichThreshold=4, k=0, target.pct=NULL, caseColumn='Cases', lastDate=NULL) {
   ## check for correct column headers
@@ -102,6 +103,8 @@ thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, w
 #########################################
 ########   special applyALERT   ############
 #########################################
+
+##returns the start and end dates
 
 special_applyALERT <- function (data, threshold, k = 0, lag = 7, minWeeks = 8, target.pct = NULL, 
           plot = FALSE, caseColumn = "Cases") 
@@ -186,3 +189,48 @@ special_applyALERT <- function (data, threshold, k = 0, lag = 7, minWeeks = 8, t
   return(out)
 }
 
+
+
+## make a nice figure of selected simulations
+sim_compare_figs <- function(start_and_end, selected_sims, index) {
+  ggplot() + 
+    theme_classic() +
+    xlim(selected_sims[[index]]$Date[1], selected_sims[[index]]$Date[590]) +
+    labs(y = "Simulated cases", x = "Threshold-based intervention periods") +
+    geom_bar(aes(y=selected_sims[[index]]$Cases, x=selected_sims[[index]]$Date), stat="identity") +
+    geom_vline(aes(xintercept=as.numeric(selected_sims[[index]]$Date[200])), linetype="dashed",
+               alpha=0.5, show.legend = FALSE) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[1], 
+                  xmax = start_and_end[[index]]$xstop[1], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[2], 
+                  xmax = start_and_end[[index]]$xstop[2], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[3], 
+                  xmax = start_and_end[[index]]$xstop[3], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[4], 
+                  xmax = start_and_end[[index]]$xstop[4], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[5], 
+                  xmax = start_and_end[[index]]$xstop[5], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[6], 
+                  xmax = start_and_end[[index]]$xstop[6], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[7], 
+                  xmax = start_and_end[[index]]$xstop[7], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[8], 
+                  xmax = start_and_end[[index]]$xstop[8], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[9], 
+                  xmax = start_and_end[[index]]$xstop[9], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[10], 
+                  xmax = start_and_end[[index]]$xstop[10], 
+                  ymin = -40, ymax = -15), alpha = 0.2) +
+    geom_rect(aes(xmin = start_and_end[[index]]$xstart[11], 
+                  xmax = start_and_end[[index]]$xstop[11], 
+                  ymin = -40, ymax = -15), alpha = 0.2) 
+}

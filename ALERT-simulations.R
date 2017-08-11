@@ -74,6 +74,7 @@ coefnames <- names(holder)
 
 print(xtable(all, type="html", digits=4))
 
+### use param values within 1 sd for upper and lower bounds
 upper <- all[1]+(2*chco.dat_res$se)
 lower <- all[1]-(2*chco.dat_res$se)
 
@@ -87,7 +88,7 @@ limits <- data.frame(lower, upper)
 holder <- list()
 
 for (i in 1:nrow(limits)){
-  holder[[i]] <- seq(from=limits[i,1], to=limits[i,2], length.out=100
+  holder[[i]] <- seq(from=limits[i,1], to=limits[i,2], length.out=50
                      )
 }
 
@@ -180,7 +181,7 @@ filler <- (createALERT(data, firstMonth=9))
 
 #choose the number of simulations to perform
 
-snum <- 100
+snum <- 20
 
 simulations <- list()
 
@@ -234,9 +235,9 @@ for (i in 1:nrow(ranges)){
       simset$Date <- as.Date(simset$Date)
       write.csv(simset, file=paste("~/Desktop/applied-ALERT-data/simulated-data/", 
                                    ranges$param[i], ranges$value[i],
-                                   "_sim#", k, ".csv", sep=""))
-      simset_train <- simset[1:200,]
-      simset_test <- simset[201:nrow(simset),]
+                                   "sim#", k, ".csv", sep="_"))
+      simset_train <- simset[1:260,]
+      simset_test <- simset[261:nrow(simset),]
       ##to get the FirstMonth
       gamma <- as.numeric(res2$coefficients[4])
       delta <- as.numeric(res2$coefficients[5])
@@ -245,6 +246,7 @@ for (i in 1:nrow(ranges)){
       xmin <- optimize(f=end.fxn, lower=0, upper=1, maximum=FALSE)$minimum
       halfcurve_value <- ifelse (round((xmax*52-xmin*52)/2 + (xmin*52))>0, 
                                 round((xmax*52-xmin*52)/2 + (xmin*52)), round((xmin*52-xmax*52)/2 + (xmax*52)))
+      ##the firstMonth approach probably is still not ideal
       firstMonth_value <- month(simset_train$Date[round(xmin*52+halfcurve_value)])
       minWeeks_value <- 8
       alertstats2[((i-1)*snum)+k,] <- c(get_stats(simset_train, firstMonth=firstMonth_value,
@@ -347,8 +349,7 @@ delta.plot <- ggplot(filter(alertstats2, parameter=="delta")) +
   xlab("parameter value")+
   ylab("median percent cases captured")
 
-
-nu.plot <- ggplot(filter(alertstats2, parameter=="nu")) +
+lambda.plot <- ggplot(filter(alertstats2, parameter=="lambda")) +
   geom_point(aes(x=as.numeric(value), y=median.pct.cases.captured, color=success)) +
   ##  scale_color_gradient2(guide=guide_colorbar(direction="vertical"),
   #                     limits=c(3, (8)), low = "white", mid = "black", high = "black", midpoint = 6, na.value='grey') +
@@ -359,6 +360,38 @@ nu.plot <- ggplot(filter(alertstats2, parameter=="nu")) +
   xlab("parameter value")+
   ylab("median percent cases captured")
 
+beta.plot <- ggplot(filter(alertstats2, parameter=="beta")) +
+  geom_point(aes(x=as.numeric(value), y=median.pct.cases.captured, color=success)) +
+  ##  scale_color_gradient2(guide=guide_colorbar(direction="vertical"),
+  #                     limits=c(3, (8)), low = "white", mid = "black", high = "black", midpoint = 6, na.value='grey') +
+  scale_size(range = c(1, 6)) +
+  #facet_wrap(~threshold, ncol=3)+
+  theme_classic() +
+  geom_hline(aes(yintercept=80), linetype="longdash", show.legend=FALSE) +
+  xlab("parameter value")+
+  ylab("median percent cases captured")
+
+gamma.plot <- ggplot(filter(alertstats2, parameter=="gamma")) +
+  geom_point(aes(x=as.numeric(value), y=median.pct.cases.captured, color=success)) +
+  ##  scale_color_gradient2(guide=guide_colorbar(direction="vertical"),
+  #                     limits=c(3, (8)), low = "white", mid = "black", high = "black", midpoint = 6, na.value='grey') +
+  scale_size(range = c(1, 6)) +
+  #facet_wrap(~threshold, ncol=3)+
+  theme_classic() +
+  geom_hline(aes(yintercept=80), linetype="longdash", show.legend=FALSE) +
+  xlab("parameter value")+
+  ylab("median percent cases captured")
+
+psi.plot <- ggplot(filter(alertstats2, parameter=="psi")) +
+  geom_point(aes(x=as.numeric(value), y=median.pct.cases.captured, color=success)) +
+  ##  scale_color_gradient2(guide=guide_colorbar(direction="vertical"),
+  #                     limits=c(3, (8)), low = "white", mid = "black", high = "black", midpoint = 6, na.value='grey') +
+  scale_size(range = c(1, 6)) +
+  #facet_wrap(~threshold, ncol=3)+
+  theme_classic() +
+  geom_hline(aes(yintercept=80), linetype="longdash", show.legend=FALSE) +
+  xlab("parameter value")+
+  ylab("median percent cases captured")
 
 #The sin term manages the width of the seasonal epidemic/peak height/baseline noise
 
@@ -403,19 +436,64 @@ med.lowweeks.diff.performance
 ###### PLOT SOME FAKE DATA!!!! #######
 ######################################
 
+## plot a set of randomly selected data
+
+directory <- dir("~/Desktop/applied-ALERT-data/simulated-data/")
+
+sim_plot <- sample(directory,10,replace=FALSE)
+
+start_and_end_real <- list()
+selected_sims_real <- list()
+
+for (i in 1:length(sim_plot)){
+  print(sim_plot[i])
+  holder <- read.csv(paste("~/Desktop/applied-ALERT-data/simulated-data/", sim_plot[i], sep=''))
+  sim_components <- unlist(strsplit(sim_plot[i], "_"))
+##extract the parameter info and simulation number  
+  parameter_realized <- sim_components[2]
+  value_realized <- sim_components[3]
+  sim_number_realized <- as.integer(sim_components[5])
+## set firstMonth and threshold to what was determined to be optimal
+  ## to prep for thresholdtestALERT
+  first_Month <- filter(alertstats2, parameter==parameter_realized &
+                          value==value_realized & 
+                          sim_number==sim_number_realized)$firstMonth
+  threshold <- filter(alertstats2, parameter==parameter_realized &
+                              value==value_realized & 
+                              sim_number==sim_number_realized)$threshold
+##make sure Dates are Dates
+  holder$Date <- as.Date(holder$Date)
+  ALERT_dates <- select(data.frame(
+    thresholdtestALERT(holder, whichThreshold = threshold, 
+                       firstMonth = first_Month)$details), start, end)
+##convert dates to something human readable for plotting
+  ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
+  ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+  colnames(ALERT_dates) <- c("xstart", "xstop")
+  start_and_end_real[[i]] <- ALERT_dates
+  selected_sims_real[[i]] <- holder  
+}
+
+##for example
+sim_compare_figs(start_and_end_real, selected_sims_real, 6)
+
+
+
+### plot a pre-specified dataset for funsies
+
 holder <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/gamma-1.31716908734946_sim#26.csv")
 
-first_Month <- filter(med.stats, parameter=="gamma" & value==-1.31716908734946)$median.firstMonth
+first_Month <- filter(alertstats2, parameter=="gamma" & value==-1.31716908734946 & sim_number==26)$firstMonth
 
-threshold <- round(filter(med.stats, parameter=="gamma" & value==-1.31716908734946)$threshold)
+threshold <- round(filter(alertstats2, parameter=="gamma" & value==-1.31716908734946 & sim_number==26)$threshold)
 
 ##make sure Dates are Dates
 holder$Date <- as.Date(holder$Date)
 
-thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = 5)
+thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = first_Month)
 
 ##is this an alert period?
-holder$smooththres <- ifelse (lowess(holder$Cases, f=0.001)$y>=threshold, TRUE, FALSE)
+#holder$smooththres <- ifelse (lowess(holder$Cases, f=0.001)$y>=threshold, TRUE, FALSE)
 
 ##make the year factor column
 A <- rep(1, times=39)
@@ -425,16 +503,16 @@ for(i in 2:11){
 A <- append(rep(12, nrow(holder)-length(A)), A)
 holder$year <- as.factor(rev(A))
 
-ALERT_dates <- holder %>% group_by(year, smooththres)%>% arrange(Date) %>% 
-   summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
-  data.frame() %>% 
-  filter(smooththres==TRUE) %>% select(-year, -smooththres)
+#ALERT_dates <- holder %>% group_by(year, smooththres)%>% arrange(Date) %>% 
+#   summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
+#  data.frame() %>% 
+#  filter(smooththres==TRUE) %>% select(-year, -smooththres)
 
 ymin <- -2
 
 ALERT_dates <- select(
     data.frame(
-    thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = 9)$details), start, end)
+    thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = first_Month)$details), start, end)
 
 ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
 ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
@@ -478,6 +556,9 @@ threstrig <- ggplot() + #this is the ALERT dates
                 ymin = -40, ymax = -15), alpha = 0.2) +
   geom_rect(aes(xmin = ALERT_dates$xstart[10], 
                 xmax = ALERT_dates$xstop[10], 
+                ymin = -40, ymax = -15), alpha = 0.2) +
+  geom_rect(aes(xmin = ALERT_dates$xstart[11], 
+                xmax = ALERT_dates$xstop[11], 
                 ymin = -40, ymax = -15), alpha = 0.2) 
 threstrig 
 #gridExtra::grid.arrange(threstrig, performance, heights=c(1, 3))
