@@ -192,45 +192,108 @@ special_applyALERT <- function (data, threshold, k = 0, lag = 7, minWeeks = 8, t
 
 
 ## make a nice figure of selected simulations
-sim_compare_figs <- function(start_and_end, selected_sims, index) {
+sim_compare_figs <- function(start_and_end, selected_sims, index, sims_metadata) {
   ggplot() + 
     theme_classic() +
+    theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
     xlim(selected_sims[[index]]$Date[1], selected_sims[[index]]$Date[590]) +
-    labs(y = "Simulated cases", x = "Threshold-based intervention periods") +
-    geom_bar(aes(y=selected_sims[[index]]$Cases, x=selected_sims[[index]]$Date), stat="identity") +
-    geom_vline(aes(xintercept=as.numeric(selected_sims[[index]]$Date[200])), linetype="dashed",
+    ylim(-15, 100) +
+   # labs(y = "Simulated cases", x = "Threshold-based intervention periods") +
+    geom_bar(aes(y=selected_sims[[index]]$Cases, x=selected_sims[[index]]$Date), 
+             stat="identity", fill="grey60") +
+    geom_vline(aes(xintercept=as.numeric(selected_sims[[index]]$Date[260])), linetype="dashed",
                alpha=0.5, show.legend = FALSE) +
+    annotate("text", x = as.Date("2009-05-01"), y = 99, 
+             label = paste(sims_metadata[[index]][1], "=", 
+                           round(as.numeric(sims_metadata[[index]][2]), digits=4), 
+                           ", firstMonth=", sims_metadata[[index]][4], ", threshold=", 
+                           sims_metadata[[index]][5], ", simulation=", 
+                           sims_metadata[[index]][3], sep="")) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[1], 
                   xmax = start_and_end[[index]]$xstop[1], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[2], 
                   xmax = start_and_end[[index]]$xstop[2], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[3], 
                   xmax = start_and_end[[index]]$xstop[3], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[4], 
                   xmax = start_and_end[[index]]$xstop[4], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[5], 
                   xmax = start_and_end[[index]]$xstop[5], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[6], 
                   xmax = start_and_end[[index]]$xstop[6], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[7], 
                   xmax = start_and_end[[index]]$xstop[7], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[8], 
                   xmax = start_and_end[[index]]$xstop[8], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[9], 
                   xmax = start_and_end[[index]]$xstop[9], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[10], 
                   xmax = start_and_end[[index]]$xstop[10], 
-                  ymin = -40, ymax = -15), alpha = 0.2) +
+                  ymin = -15, ymax = -5), alpha = 0.9) +
     geom_rect(aes(xmin = start_and_end[[index]]$xstart[11], 
                   xmax = start_and_end[[index]]$xstop[11], 
-                  ymin = -40, ymax = -15), alpha = 0.2) 
+                  ymin = -15, ymax = -5), alpha = 0.9) 
+}
+
+
+## make a nice figure of real data
+real_compare_figs <- function(start_and_end, real_data, fig_label) {
+  real_data$Cases[is.na(real_data$Cases)] <- 0
+  real_data2 <- arrange(real_data, Date)
+  ggplot() + 
+    theme_classic() +
+    theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
+    xlim(real_data2$Date[1], real_data2$Date[590]) +
+    ylim(-15, 100) +
+    # labs(y = "Simulated cases", x = "Threshold-based intervention periods") +
+    geom_bar(aes(y=real_data2$Cases, x=real_data2$Date), 
+             stat="identity", fill="grey60") +
+    annotate("text", x = as.Date("2009-05-01"), y = 99, 
+             label = fig_label) +
+    geom_rect(aes(xmin = start_and_end[1,1], 
+                  xmax = start_and_end[1,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[2,1], 
+                  xmax = start_and_end[2,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[3,1], 
+                  xmax = start_and_end[3,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[4,1], 
+                  xmax = start_and_end[4,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[5,1], 
+                  xmax = start_and_end[5,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[6,1], 
+                  xmax = start_and_end[6,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[7,1], 
+                  xmax = start_and_end[7,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[8,1], 
+                  xmax = start_and_end[8,2], 
+                  ymin = -15, ymax = -5), alpha = 0.9)#
+}
+
+
+  +
+    geom_rect(aes(xmin = start_and_end[9], 
+                  xmax = start_and_end[9], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[10], 
+                  xmax = start_and_end[10], 
+                  ymin = -15, ymax = -5), alpha = 0.9) +
+    geom_rect(aes(xmin = start_and_end[11], 
+                  xmax = start_and_end[11], 
+                  ymin = -15, ymax = -5), alpha = 0.9) 
 }

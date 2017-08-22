@@ -244,10 +244,8 @@ for (i in 1:nrow(ranges)){
       end.fxn <- function(y) gamma*sin(2*pi*y) + delta*cos(2*pi*y)
       xmax <- optimize(f=end.fxn, lower=0, upper=1, maximum=TRUE)$maximum
       xmin <- optimize(f=end.fxn, lower=0, upper=1, maximum=FALSE)$minimum
-      halfcurve_value <- ifelse (round((xmax*52-xmin*52)/2 + (xmin*52))>0, 
-                                round((xmax*52-xmin*52)/2 + (xmin*52)), round((xmin*52-xmax*52)/2 + (xmax*52)))
-      ##the firstMonth approach probably is still not ideal
-      firstMonth_value <- month(simset_train$Date[round(xmin*52+halfcurve_value)])
+      firstMonth_value <- month(simset_train$Date[round(uniroot(end.fxn, c(0,1), 
+                                                                 extendInt="upX", trace=TRUE)$root*52)])
       minWeeks_value <- 8
       alertstats2[((i-1)*snum)+k,] <- c(get_stats(simset_train, firstMonth=firstMonth_value,
                                                   minWeeks=minWeeks_value,
@@ -307,12 +305,12 @@ med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold),
 ##alertstats2 holds the uncollapsed ALERT results
 ## med.stats has the collapsed results
 write.csv(med.stats, "~/Desktop/applied-ALERT-data/simulated-data/med_stats.csv")
+write.csv(alertstats, "~/Desktop/applied-ALERT-data/simulated-data/alertstats.csv")
 write.csv(alertstats2, "~/Desktop/applied-ALERT-data/simulated-data/alertstats2.csv")
-write.csv(alertstats3, "~/Desktop/applied-ALERT-data/simulated-data/alertstats3.csv")
 
 med.stats <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/med_stats.csv", stringsAsFactors = F)
+alertstats <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/alertstats.csv", stringsAsFactors = F)
 alertstats2 <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/alertstats2.csv", stringsAsFactors = F)
-alertstats3 <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/alertstats3.csv", stringsAsFactors = F)
 
 #it looks like ar.1, end.1, and end.t are going to be the most interesting.
 #maybe overdispersion?
@@ -440,10 +438,11 @@ med.lowweeks.diff.performance
 
 directory <- dir("~/Desktop/applied-ALERT-data/simulated-data/")
 
-sim_plot <- sample(directory,10,replace=FALSE)
+sim_plot <- sample(directory,20,replace=FALSE)
 
 start_and_end_real <- list()
 selected_sims_real <- list()
+sims_metadata_real <- list()
 
 for (i in 1:length(sim_plot)){
   print(sim_plot[i])
@@ -470,96 +469,44 @@ for (i in 1:length(sim_plot)){
   ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
   ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
   colnames(ALERT_dates) <- c("xstart", "xstop")
+##replace case counts>100 with 100 to keep them from being dropped or needing to rescale
+  holder$Cases[holder$Cases>100] <- 100
   start_and_end_real[[i]] <- ALERT_dates
   selected_sims_real[[i]] <- holder  
+  sims_metadata_real[[i]] <- c(parameter_realized, value_realized, sim_number_realized, first_Month, threshold)
 }
 
 ##for example
-sim_compare_figs(start_and_end_real, selected_sims_real, 6)
+
+sim_compare_figs(start_and_end_real, selected_sims_real, 6, sims_metadata = sims_metadata_real)
+
+library(gridExtra)
+
+grid.arrange(sim_compare_figs(start_and_end_real, selected_sims_real, 1, sims_metadata_real), 
+             sim_compare_figs(start_and_end_real, selected_sims_real, 3, sims_metadata_real), 
+             sim_compare_figs(start_and_end_real, selected_sims_real, 2, sims_metadata_real),
+             sim_compare_figs(start_and_end_real, selected_sims_real, 9, sims_metadata_real), 
+             sim_compare_figs(start_and_end_real, selected_sims_real, 7, sims_metadata_real),
+             sim_compare_figs(start_and_end_real, selected_sims_real, 10, sims_metadata_real),
+             ncol=1, left="simulated cases", 
+             bottom="ALERT periods across time")
 
 
+###################################################
+######### TIME TO ANALYZE THE RESULTS  ############
+###################################################
 
-### plot a pre-specified dataset for funsies
+summary.stats <- alertstats2 %>% group_by(parameter) %>% summarize(median(as.integer(median.dur)), 
+                                                                  median(test.median.dur), 
+                                                 median(as.numeric(median.pct.cases.captured)), 
+                                                 median(test.median.pct.cases.captured),
+                                                 median(as.numeric(mean.low.weeks.incl)),
+                                                 round(median(test.mean.low.weeks.incl), digits=1)) %>% data.frame
 
-holder <- read.csv("~/Desktop/applied-ALERT-data/simulated-data/gamma-1.31716908734946_sim#26.csv")
+rownames(summary.stats) <- summary.stats$parameter
+summary.stats$parameter <- NULL
 
-first_Month <- filter(alertstats2, parameter=="gamma" & value==-1.31716908734946 & sim_number==26)$firstMonth
 
-threshold <- round(filter(alertstats2, parameter=="gamma" & value==-1.31716908734946 & sim_number==26)$threshold)
+require(xtable)
 
-##make sure Dates are Dates
-holder$Date <- as.Date(holder$Date)
-
-thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = first_Month)
-
-##is this an alert period?
-#holder$smooththres <- ifelse (lowess(holder$Cases, f=0.001)$y>=threshold, TRUE, FALSE)
-
-##make the year factor column
-A <- rep(1, times=39)
-for(i in 2:11){
-  A <- append(rep(i, 52), A)
-}
-A <- append(rep(12, nrow(holder)-length(A)), A)
-holder$year <- as.factor(rev(A))
-
-#ALERT_dates <- holder %>% group_by(year, smooththres)%>% arrange(Date) %>% 
-#   summarise(xstop=last(Date)-1, xstart=first(Date)-1) %>% 
-#  data.frame() %>% 
-#  filter(smooththres==TRUE) %>% select(-year, -smooththres)
-
-ymin <- -2
-
-ALERT_dates <- select(
-    data.frame(
-    thresholdtestALERT(holder, whichThreshold = threshold, firstMonth = first_Month)$details), start, end)
-
-ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
-ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
-
-ALERT_dates <- na.omit(ALERT_dates)
-
-colnames(ALERT_dates) <- c("xstart", "xstop")
-
-threstrig <- ggplot() + #this is the ALERT dates
-  theme_classic() +
-  labs(y = "Simulated cases", x = "Threshold-based intervention periods") +
-  geom_bar(aes(y=holder$Cases, x=holder$Date), stat="identity") +
-  geom_vline(aes(xintercept=as.numeric(holder$Date[200])), linetype="dashed",
-             alpha=0.5, show.legend = FALSE) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[1], 
-                xmax = ALERT_dates$xstop[1], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[2], 
-                xmax = ALERT_dates$xstop[2], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[3], 
-                xmax = ALERT_dates$xstop[3], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[4], 
-                xmax = ALERT_dates$xstop[4], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[5], 
-                xmax = ALERT_dates$xstop[5], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[6], 
-                xmax = ALERT_dates$xstop[6], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[7], 
-                xmax = ALERT_dates$xstop[7], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[8], 
-                xmax = ALERT_dates$xstop[8], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[9], 
-                xmax = ALERT_dates$xstop[9], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[10], 
-                xmax = ALERT_dates$xstop[10], 
-                ymin = -40, ymax = -15), alpha = 0.2) +
-  geom_rect(aes(xmin = ALERT_dates$xstart[11], 
-                xmax = ALERT_dates$xstop[11], 
-                ymin = -40, ymax = -15), alpha = 0.2) 
-threstrig 
-#gridExtra::grid.arrange(threstrig, performance, heights=c(1, 3))
-
+print(xtable(summary.stats), include.rownames=T)
