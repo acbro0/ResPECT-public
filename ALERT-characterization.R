@@ -10,23 +10,54 @@ require(dplyr)
 ##load the data
 chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
-
 chco$Date <- ymd(chco$Date)
-
 chco <- arrange(chco, Date)
-
 dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
-
 dates$startDate <- ymd(dates$startDate)
-
 dates$endDate <- ymd(dates$endDate)
-
 #truncate to get years we have cutoffs for and cutoffs we have years for.
 chco <- filter(chco, Date >= head(dates$startDate, 1)-weeks(2))
-
 dates <- filter(dates, endDate <= tail(chco$Date, 1)+weeks(6))
-
 alertholder <- createALERT(chco, firstMonth=8, lag=0)
+
+thres3 <- thresholdtestALERT(chco, firstMonth = 8, whichThreshold = 3)[[2]]
+ALERT_dates <- data.frame(thres3[[1]])
+##convert dates to something human readable for plotting
+ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
+ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+ALERT_dates <- ALERT_dates[,8:9]
+colnames(ALERT_dates) <- c("xstart", "xstop")
+
+library(gridExtra)
+
+grid.arrange(real_compare_figs(ALERT_dates, chco, "ALERT, threshold=3"),
+             real_compare_figs(dates, chco, "actual dates"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 dates$yearIdx <- 1:nrow(dates)
 

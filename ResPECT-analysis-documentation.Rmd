@@ -1,0 +1,88 @@
+---
+title: "ResPECT central analysis verification"
+author: "Alexandria C. Brown"
+date: "August 23, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("mice")
+library("lme4")
+library("lattice")
+library("gridExtra")
+library("MASS")
+library("dplyr")
+load("/home/lex/Desktop/ARMS-models-workspace.rda")
+
+ls()  #items in the workspace
+```
+
+##QQPLOTS
+
+range check (are there any imputed values out of observed data range), 
+mean check (flag if difference between mean of imputed/non-imputed is over 1 sd of observed data), 
+Count missing values (are there any missing values that we “missed”?)
+Number of unique imputed values. if N = the number of unique observations in the dataset for a given variable. Then throw a flag if the number of unique observations in the imputed dataset is less than or equal to than `ceiling(N*0.10)`.
+
+
+```{r cars}
+
+             
+grid.arrange(densityplot(demimp, ~URI_exposure_perc), 
+             densityplot(demimp, ~vaccine_recieved), 
+             densityplot(demimp, ~num_hhmem_0_5), 
+             densityplot(demimp, ~race), 
+             densityplot(demimp, ~occupational_risk), 
+             densityplot(demimp, ~mode_fpe_freq), 
+             densityplot(demimp, ~mode_hand_hyg), 
+             densityplot(demimp, ~age), 
+             densityplot(demimp, ~smoke_tobacco))    
+   
+
+```
+
+##Primary outcome, ITT and PP imputations
+
+```{r}
+summary(demog$Influenza) # the raw data
+summary(demimp$imp$Influenza) # the imputed outcomes
+get_ratio <- function(a_logical_vec){as.numeric(table(a_logical_vec)["TRUE"])/length(a_logical_vec)}
+  #a ratio of positive Influenza detections divided by the total number of participants
+
+get_ratio(demog$Influenza) # the ratio of affected participants
+hist(as.numeric(apply(demimp$imp$Influenza, 2, get_ratio)), 
+     round(digits=10)) # histogram showing spread of ratio in ITT imputations
+densityplot(demimp, ~Influenza) # blue line is the raw data, red is ITT imputed
+
+hist(as.numeric(apply(per_protocol_demimp$imp$Influenza, 2, get_ratio)), 
+     round(digits=10)) # histogram showing spread of ratio in PP imputations
+densityplot(per_protocol_demimp, ~Influenza) # blue line is the raw data, red is PP imputed
+```
+
+##Secondary outcomes
+
+```{r}
+grid.arrange(densityplot(demimp, ~ARI_events), 
+             densityplot(demimp, ~ILI_events),
+             densityplot(demimp, ~LCRI_events),
+             densityplot(demimp, ~LDI_events))
+
+##ARI
+#raw data mean and sd
+upper <- mean(demog$ARI_events, na.rm=T)+sd(demog$ARI_events, na.rm=T)
+lower <- mean(demog$ARI_events, na.rm=T)-sd(demog$ARI_events, na.rm=T)
+# are means of the imputed outcomes within 1 SD of the real data?
+ifelse(apply(demimp$imp$ARI_events, 2, mean)<upper & 
+         apply(demimp$imp$ARI_events, 2, mean)>lower, "MEAN TEST OK", "WARNING: MEAN OUTSIDE 1 SD")
+##are imputed values within the range of the real data?
+ifelse(max(demog$ARI_events)>=apply(demimp$imp$ARI_events, 2, max) & 
+         min(demog$ARI_events)<=apply(demimp$imp$ARI_events, 2, min), 
+       "RANGE TEST OK", "WARNING: RANGE CHECK FAIL")
+##next check for unique values
+
+
+   
+      
+      
+      
+```
