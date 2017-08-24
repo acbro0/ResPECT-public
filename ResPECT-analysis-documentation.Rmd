@@ -5,7 +5,7 @@ date: "August 23, 2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library("mice")
 library("lme4")
 library("lattice")
@@ -17,31 +17,9 @@ load("/home/lex/Desktop/ARMS-models-workspace.rda")
 ls()  #items in the workspace
 ```
 
-##QQPLOTS
-
-range check (are there any imputed values out of observed data range), 
-mean check (flag if difference between mean of imputed/non-imputed is over 1 sd of observed data), 
-Count missing values (are there any missing values that we “missed”?)
-Number of unique imputed values. if N = the number of unique observations in the dataset for a given variable. Then throw a flag if the number of unique observations in the imputed dataset is less than or equal to than `ceiling(N*0.10)`.
-
-
-```{r cars}
-
-             
-grid.arrange(densityplot(demimp, ~URI_exposure_perc), 
-             densityplot(demimp, ~vaccine_recieved), 
-             densityplot(demimp, ~num_hhmem_0_5), 
-             densityplot(demimp, ~race), 
-             densityplot(demimp, ~occupational_risk), 
-             densityplot(demimp, ~mode_fpe_freq), 
-             densityplot(demimp, ~mode_hand_hyg), 
-             densityplot(demimp, ~age), 
-             densityplot(demimp, ~smoke_tobacco))    
-   
-
-```
-
 ##Primary outcome, ITT and PP imputations
+
+Each will be examined for the per protocol (PP) and intention to treat (ITT) analyses.
 
 ```{r}
 summary(demog$Influenza) # the raw data
@@ -61,28 +39,243 @@ densityplot(per_protocol_demimp, ~Influenza) # blue line is the raw data, red is
 
 ##Secondary outcomes
 
+The following function tests each set of imputed data as follows:
+1. A qq-plot
+2. Checks that the number of missing values equals the number of imputed values
+3. Checks that the means of the imputed values are within one standard deviation from the mean of the real data
+4. Checks that imputed values are within the range of the real data
+5. Checks that imputed datasets have fewer unique values than the data
+
+Each will be examined for the per protocol (PP) and intention to treat (ITT) analyses.
+
 ```{r}
-grid.arrange(densityplot(demimp, ~ARI_events), 
-             densityplot(demimp, ~ILI_events),
-             densityplot(demimp, ~LCRI_events),
-             densityplot(demimp, ~LDI_events))
 
-##ARI
+check_imputations <- function(imputed_data_object, real_dataset_column){
+  holder <- list()
+qqplot(imputed_data_object[[3]], sample(real_dataset_column, 
+                                          size=nrow(imputed_data_object), replace=F))
+qqline(sample(real_dataset_column, size=nrow(imputed_data_object), replace=F))
+##are all missing values accounted for?
+holder[[1]] <- ifelse(nrow(imputed_data_object)==length(real_dataset_column[is.na(real_dataset_column)]), 
+       "ALL NAs IMPUTED", "STOP! NA VALUES STILL PRESENT")
 #raw data mean and sd
-upper <- mean(demog$ARI_events, na.rm=T)+sd(demog$ARI_events, na.rm=T)
-lower <- mean(demog$ARI_events, na.rm=T)-sd(demog$ARI_events, na.rm=T)
+upper <- mean(real_dataset_column, na.rm=T)+sd(real_dataset_column, na.rm=T)
+lower <- mean(real_dataset_column, na.rm=T)-sd(real_dataset_column, na.rm=T)
 # are means of the imputed outcomes within 1 SD of the real data?
-ifelse(apply(demimp$imp$ARI_events, 2, mean)<upper & 
-         apply(demimp$imp$ARI_events, 2, mean)>lower, "MEAN TEST OK", "WARNING: MEAN OUTSIDE 1 SD")
+holder[[2]] <- ifelse(apply(imputed_data_object, 2, mean)<upper & 
+         apply(imputed_data_object, 2, mean)>lower, "MEAN TEST OK", 
+       "WARNING: MEAN OUTSIDE 1 SD")
 ##are imputed values within the range of the real data?
-ifelse(max(demog$ARI_events)>=apply(demimp$imp$ARI_events, 2, max) & 
-         min(demog$ARI_events)<=apply(demimp$imp$ARI_events, 2, min), 
+holder[[3]] <- ifelse(max(real_dataset_column)>=apply(imputed_data_object, 2, max) & 
+         min(real_dataset_column)<=apply(imputed_data_object, 2, min), 
        "RANGE TEST OK", "WARNING: RANGE CHECK FAIL")
-##next check for unique values
+##imputed datasets should not have more unique values than the data
+#the following function will test this
+holder[[4]] <- apply(imputed_data_object, 2, 
+      function(x){ifelse(length(x[!x %in% unique(x[duplicated(x)==TRUE])])<=ceiling(length(real_dataset_column[!real_dataset_column %in% unique(real_dataset_column[duplicated(real_dataset_column)==TRUE])])*0.1), 
+                         "UNIQUE VALUE CHECK PASSED", "WARNING: CHECK UNIQUE VALUES")}) 
+return(holder)
+}
 
-
-   
-      
-      
-      
 ```
+
+For each secondary outcome, there is a density plot in which imputation density is in red, while the real data density is the blue line.  Then the results of the check_imputations function is shown.
+
+ARI, ITT
+
+```{r}
+densityplot(demimp, ~ARI_events)
+check_imputations(demimp$imp$ARI_events, demog$ARI_events)
+```
+
+ARI, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~ARI_events)
+check_imputations(per_protocol_demimp$imp$ARI_events, demog$ARI_events)
+```
+
+LCRI, ITT
+
+```{r}
+densityplot(demimp, ~LCRI_events)
+check_imputations(demimp$imp$LCRI_events, demog$LCRI_events)
+```
+
+LCRI, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~LCRI_events)
+check_imputations(per_protocol_demimp$imp$LCRI_events, demog$LCRI_events)
+```
+
+LDI, ITT
+
+```{r}
+densityplot(demimp, ~LDI_events)
+check_imputations(demimp$imp$LDI_events, demog$LDI_events)
+```
+
+LDI, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~LDI_events)
+check_imputations(per_protocol_demimp$imp$LDI_events, demog$LDI_events)
+```
+
+ILI, ITT
+
+```{r}
+densityplot(demimp, ~ILI_events)
+check_imputations(demimp$imp$ILI_events, demog$ILI_events)
+```
+
+ILI, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~ILI_events)
+check_imputations(per_protocol_demimp$imp$ILI_events, demog$ILI_events)
+```
+
+##Imputation of covariates
+
+The covariates include 
+1. The percent of times a participant reported having been in contact with someone with URI symptoms
+2. Whether they were vaccinated for the flu
+3. Number of children in the home under 5 years old
+4. Race
+5. Assigned occupational risk
+6. Self-reported FPE compliance response occuring most often per participant
+7. Self-reported hand hygiene compliance response occuring most often per participant
+8. Age
+9. Whether or not a participant reported smoking tobacco
+
+Each will be examined for the per protocol (PP) and intention to treat (ITT) analyses.
+
+URI_exposure_perc, ITT
+
+```{r}
+densityplot(demimp, ~URI_exposure_perc)
+check_imputations(demimp$imp$URI_exposure_perc, demog$URI_exposure_perc)
+```
+
+URI_exposure_perc, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~URI_exposure_perc)
+check_imputations(per_protocol_demimp$imp$URI_exposure_perc, demog$URI_exposure_perc)
+```
+
+vaccine_recieved, ITT
+
+```{r}
+densityplot(demimp, ~vaccine_recieved)
+check_imputations(demimp$imp$vaccine_recieved, demog$vaccine_recieved)
+```
+
+vaccine_recieved, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~vaccine_recieved)
+check_imputations(per_protocol_demimp$imp$vaccine_recieved, demog$vaccine_recieved)
+```
+
+num_hhmem_0_5, ITT
+
+```{r}
+densityplot(demimp, ~num_hhmem_0_5)
+check_imputations(demimp$imp$num_hhmem_0_5, demog$num_hhmem_0_5)
+```
+
+num_hhmem_0_5, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~num_hhmem_0_5)
+check_imputations(per_protocol_demimp$imp$num_hhmem_0_5, demog$num_hhmem_0_5)
+```
+
+race, ITT
+
+```{r}
+densityplot(demimp, ~race)
+check_imputations(demimp$imp$race, demog$race)
+```
+
+race, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~race)
+check_imputations(per_protocol_demimp$imp$race, demog$race)
+```
+
+occupational_risk, ITT
+
+```{r}
+densityplot(demimp, ~occupational_risk)
+check_imputations(demimp$imp$occupational_risk, demog$occupational_risk)
+```
+
+occupational_risk, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~occupational_risk)
+check_imputations(per_protocol_demimp$imp$occupational_risk, demog$occupational_risk)
+```
+
+mode_fpe_freq, ITT
+
+```{r}
+densityplot(demimp, ~mode_fpe_freq)
+check_imputations(demimp$imp$mode_fpe_freq, demog$mode_fpe_freq)
+```
+
+mode_fpe_freq, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~mode_fpe_freq)
+check_imputations(per_protocol_demimp$imp$mode_fpe_freq, demog$mode_fpe_freq)
+```
+
+mode_hand_hyg, ITT
+
+```{r}
+densityplot(demimp, ~mode_hand_hyg)
+check_imputations(demimp$imp$mode_hand_hyg, demog$mode_hand_hyg)
+```
+
+mode_hand_hyg, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~mode_hand_hyg)
+check_imputations(per_protocol_demimp$imp$mode_hand_hyg, demog$mode_hand_hyg)
+```
+
+age, ITT
+
+```{r}
+densityplot(demimp, ~age)
+check_imputations(demimp$imp$age, demog$age)
+```
+
+age, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~age)
+check_imputations(per_protocol_demimp$imp$age, demog$age)
+```
+
+smoke_tobacco, ITT
+
+```{r}
+densityplot(demimp, ~smoke_tobacco)
+check_imputations(demimp$imp$smoke_tobacco, demog$smoke_tobacco)
+```
+
+smoke_tobacco, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~smoke_tobacco)
+check_imputations(per_protocol_demimp$imp$smoke_tobacco, demog$smoke_tobacco)
+```
+
+
