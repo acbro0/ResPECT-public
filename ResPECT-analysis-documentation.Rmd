@@ -12,7 +12,8 @@ library("lattice")
 library("gridExtra")
 library("MASS")
 library("dplyr")
-load("/home/lex/Desktop/ARMS-models-workspace.rda")
+library("arm")
+load("/home/alexandria/Desktop/ARMS-models-workspace.rda")
 
 ls()  #items in the workspace
 ```
@@ -21,17 +22,27 @@ ls()  #items in the workspace
 
 Each will be examined for the per protocol (PP) and intention to treat (ITT) analyses.
 
+First a summary of the Influenza outcomes and a function to look at ratio of affected participants
 ```{r}
 summary(demog$Influenza) # the raw data
 summary(demimp$imp$Influenza) # the imputed outcomes
 get_ratio <- function(a_logical_vec){as.numeric(table(a_logical_vec)["TRUE"])/length(a_logical_vec)}
   #a ratio of positive Influenza detections divided by the total number of participants
+```
 
+Influenza outcome imputations, ITT cohort
+
+```{r}
 get_ratio(demog$Influenza) # the ratio of affected participants
 hist(as.numeric(apply(demimp$imp$Influenza, 2, get_ratio)), 
      round(digits=10)) # histogram showing spread of ratio in ITT imputations
 densityplot(demimp, ~Influenza) # blue line is the raw data, red is ITT imputed
+```
 
+Influenza outcome imputations, PP cohort
+
+```{r}
+get_ratio(pp$Influenza)
 hist(as.numeric(apply(per_protocol_demimp$imp$Influenza, 2, get_ratio)), 
      round(digits=10)) # histogram showing spread of ratio in PP imputations
 densityplot(per_protocol_demimp, ~Influenza) # blue line is the raw data, red is PP imputed
@@ -40,11 +51,11 @@ densityplot(per_protocol_demimp, ~Influenza) # blue line is the raw data, red is
 ##Secondary outcomes
 
 The following function tests each set of imputed data as follows:
-1. A qq-plot
-2. Checks that the number of missing values equals the number of imputed values
-3. Checks that the means of the imputed values are within one standard deviation from the mean of the real data
-4. Checks that imputed values are within the range of the real data
-5. Checks that imputed datasets have fewer unique values than the data
+
+1. Check that the number of missing values equals the number of imputed values
+2. Check that the means of the imputed values are within one standard deviation from the mean of the real data
+3. Check that imputed values are within the range of the real data
+4. Check that imputed datasets have fewer unique values than the data
 
 Each will be examined for the per protocol (PP) and intention to treat (ITT) analyses.
 
@@ -52,12 +63,9 @@ Each will be examined for the per protocol (PP) and intention to treat (ITT) ana
 
 check_imputations <- function(imputed_data_object, real_dataset_column){
   holder <- list()
-qqplot(imputed_data_object[[3]], sample(real_dataset_column, 
-                                          size=nrow(imputed_data_object), replace=F))
-qqline(sample(real_dataset_column, size=nrow(imputed_data_object), replace=F))
 ##are all missing values accounted for?
 holder[[1]] <- ifelse(nrow(imputed_data_object)==length(real_dataset_column[is.na(real_dataset_column)]), 
-       "ALL NAs IMPUTED", "STOP! NA VALUES STILL PRESENT")
+       paste("ALL NAs IMPUTED (", nrow(imputed_data_object), ")", sep=""), "STOP! NA VALUES STILL PRESENT")
 #raw data mean and sd
 upper <- mean(real_dataset_column, na.rm=T)+sd(real_dataset_column, na.rm=T)
 lower <- mean(real_dataset_column, na.rm=T)-sd(real_dataset_column, na.rm=T)
@@ -66,8 +74,8 @@ holder[[2]] <- ifelse(apply(imputed_data_object, 2, mean)<upper &
          apply(imputed_data_object, 2, mean)>lower, "MEAN TEST OK", 
        "WARNING: MEAN OUTSIDE 1 SD")
 ##are imputed values within the range of the real data?
-holder[[3]] <- ifelse(max(real_dataset_column)>=apply(imputed_data_object, 2, max) & 
-         min(real_dataset_column)<=apply(imputed_data_object, 2, min), 
+holder[[3]] <- ifelse(max(real_dataset_column, na.rm=T)>=apply(imputed_data_object, 2, max) & 
+         min(real_dataset_column, na.rm=T)<=apply(imputed_data_object, 2, min), 
        "RANGE TEST OK", "WARNING: RANGE CHECK FAIL")
 ##imputed datasets should not have more unique values than the data
 #the following function will test this
@@ -76,7 +84,6 @@ holder[[4]] <- apply(imputed_data_object, 2,
                          "UNIQUE VALUE CHECK PASSED", "WARNING: CHECK UNIQUE VALUES")}) 
 return(holder)
 }
-
 ```
 
 For each secondary outcome, there is a density plot in which imputation density is in red, while the real data density is the blue line.  Then the results of the check_imputations function is shown.
@@ -85,197 +92,238 @@ ARI, ITT
 
 ```{r}
 densityplot(demimp, ~ARI_events)
-check_imputations(demimp$imp$ARI_events, demog$ARI_events)
+check_imputations(demimp$imp$ARI_events, demimp$data$ARI_events)
 ```
 
 ARI, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~ARI_events)
-check_imputations(per_protocol_demimp$imp$ARI_events, demog$ARI_events)
+check_imputations(per_protocol_demimp$imp$ARI_events, per_protocol_demimp$data$ARI_events)
 ```
 
 LCRI, ITT
 
 ```{r}
 densityplot(demimp, ~LCRI_events)
-check_imputations(demimp$imp$LCRI_events, demog$LCRI_events)
+check_imputations(demimp$imp$LCRI_events, demimp$data$LCRI_events)
 ```
 
 LCRI, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~LCRI_events)
-check_imputations(per_protocol_demimp$imp$LCRI_events, demog$LCRI_events)
+check_imputations(per_protocol_demimp$imp$LCRI_events, per_protocol_demimp$data$LCRI_events)
 ```
 
 LDI, ITT
 
 ```{r}
 densityplot(demimp, ~LDI_events)
-check_imputations(demimp$imp$LDI_events, demog$LDI_events)
+check_imputations(demimp$imp$LDI_events, demimp$data$LDI_events)
 ```
 
 LDI, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~LDI_events)
-check_imputations(per_protocol_demimp$imp$LDI_events, demog$LDI_events)
+check_imputations(per_protocol_demimp$imp$LDI_events, per_protocol_demimp$data$LDI_events)
 ```
 
 ILI, ITT
 
 ```{r}
 densityplot(demimp, ~ILI_events)
-check_imputations(demimp$imp$ILI_events, demog$ILI_events)
+check_imputations(demimp$imp$ILI_events, demimp$data$ILI_events)
 ```
 
 ILI, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~ILI_events)
-check_imputations(per_protocol_demimp$imp$ILI_events, demog$ILI_events)
+check_imputations(per_protocol_demimp$imp$ILI_events, per_protocol_demimp$data$ILI_events)
 ```
 
 ##Imputation of covariates
 
-The covariates include 
+The continuous covariates are:
 1. The percent of times a participant reported having been in contact with someone with URI symptoms
-2. Whether they were vaccinated for the flu
-3. Number of children in the home under 5 years old
-4. Race
-5. Assigned occupational risk
-6. Self-reported FPE compliance response occuring most often per participant
-7. Self-reported hand hygiene compliance response occuring most often per participant
-8. Age
+2. Age (integer)
+
+The factor covariates are:
+3. Self-reported FPE compliance response occuring most often per participant
+4. Self-reported hand hygiene compliance response occuring most often per participant
+5. Whether they were vaccinated for the flu
+6. Number of children in the home under 5 years old
+7. Race
+8. Assigned occupational risk
 9. Whether or not a participant reported smoking tobacco
 
 Each will be examined for the per protocol (PP) and intention to treat (ITT) analyses.
+
+The following function makes a qqplot (for the continuous variables)
+
+```{r}
+imp_qqplot <- function(imputed_data_object, real_dataset_column){
+  qqplot(imputed_data_object[[3]], sample(real_dataset_column, 
+                                          size=nrow(imputed_data_object), replace=F))
+  qqline(sample(real_dataset_column, size=nrow(imputed_data_object), replace=F))
+}
+```
 
 URI_exposure_perc, ITT
 
 ```{r}
 densityplot(demimp, ~URI_exposure_perc)
-check_imputations(demimp$imp$URI_exposure_perc, demog$URI_exposure_perc)
+imp_qqplot(demimp$imp$URI_exposure_perc, demimp$data$URI_exposure_perc)
+check_imputations(demimp$imp$URI_exposure_perc, demimp$data$URI_exposure_perc)
 ```
 
 URI_exposure_perc, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~URI_exposure_perc)
-check_imputations(per_protocol_demimp$imp$URI_exposure_perc, demog$URI_exposure_perc)
-```
-
-vaccine_recieved, ITT
-
-```{r}
-densityplot(demimp, ~vaccine_recieved)
-check_imputations(demimp$imp$vaccine_recieved, demog$vaccine_recieved)
-```
-
-vaccine_recieved, PP
-
-```{r}
-densityplot(per_protocol_demimp, ~vaccine_recieved)
-check_imputations(per_protocol_demimp$imp$vaccine_recieved, demog$vaccine_recieved)
-```
-
-num_hhmem_0_5, ITT
-
-```{r}
-densityplot(demimp, ~num_hhmem_0_5)
-check_imputations(demimp$imp$num_hhmem_0_5, demog$num_hhmem_0_5)
-```
-
-num_hhmem_0_5, PP
-
-```{r}
-densityplot(per_protocol_demimp, ~num_hhmem_0_5)
-check_imputations(per_protocol_demimp$imp$num_hhmem_0_5, demog$num_hhmem_0_5)
-```
-
-race, ITT
-
-```{r}
-densityplot(demimp, ~race)
-check_imputations(demimp$imp$race, demog$race)
-```
-
-race, PP
-
-```{r}
-densityplot(per_protocol_demimp, ~race)
-check_imputations(per_protocol_demimp$imp$race, demog$race)
-```
-
-occupational_risk, ITT
-
-```{r}
-densityplot(demimp, ~occupational_risk)
-check_imputations(demimp$imp$occupational_risk, demog$occupational_risk)
-```
-
-occupational_risk, PP
-
-```{r}
-densityplot(per_protocol_demimp, ~occupational_risk)
-check_imputations(per_protocol_demimp$imp$occupational_risk, demog$occupational_risk)
-```
-
-mode_fpe_freq, ITT
-
-```{r}
-densityplot(demimp, ~mode_fpe_freq)
-check_imputations(demimp$imp$mode_fpe_freq, demog$mode_fpe_freq)
-```
-
-mode_fpe_freq, PP
-
-```{r}
-densityplot(per_protocol_demimp, ~mode_fpe_freq)
-check_imputations(per_protocol_demimp$imp$mode_fpe_freq, demog$mode_fpe_freq)
-```
-
-mode_hand_hyg, ITT
-
-```{r}
-densityplot(demimp, ~mode_hand_hyg)
-check_imputations(demimp$imp$mode_hand_hyg, demog$mode_hand_hyg)
-```
-
-mode_hand_hyg, PP
-
-```{r}
-densityplot(per_protocol_demimp, ~mode_hand_hyg)
-check_imputations(per_protocol_demimp$imp$mode_hand_hyg, demog$mode_hand_hyg)
+imp_qqplot(per_protocol_demimp$imp$URI_exposure_perc, per_protocol_demimp$data$URI_exposure_perc)
+check_imputations(per_protocol_demimp$imp$URI_exposure_perc, per_protocol_demimp$data$URI_exposure_perc)
 ```
 
 age, ITT
 
 ```{r}
 densityplot(demimp, ~age)
-check_imputations(demimp$imp$age, demog$age)
+imp_qqplot(demimp$imp$age, demimp$data$age)
+check_imputations(demimp$imp$age, demimp$data$age)
 ```
 
 age, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~age)
-check_imputations(per_protocol_demimp$imp$age, demog$age)
+imp_qqplot(per_protocol_demimp$imp$age, per_protocol_demimp$data$age)
+check_imputations(per_protocol_demimp$imp$age, per_protocol_demimp$data$age)
+```
+
+Now look at the factor covariates
+
+mode_fpe_freq, ITT
+
+```{r}
+densityplot(demimp, ~mode_fpe_freq)
+```
+
+mode_fpe_freq, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~mode_fpe_freq)
+```
+
+mode_hand_hyg, ITT
+
+```{r}
+densityplot(demimp, ~mode_hand_hyg)
+```
+
+mode_hand_hyg, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~mode_hand_hyg)
+```
+
+vaccine_recieved, ITT
+
+```{r}
+densityplot(demimp, ~vaccine_recieved)
+```
+
+vaccine_recieved, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~vaccine_recieved)
+```
+
+num_hhmem_0_5, ITT
+
+```{r}
+densityplot(demimp, ~num_hhmem_0_5)
+```
+
+num_hhmem_0_5, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~num_hhmem_0_5)
+```
+
+race, ITT
+
+```{r}
+densityplot(demimp, ~race)
+```
+
+race, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~race)
+```
+
+occupational_risk, ITT
+
+```{r}
+densityplot(demimp, ~occupational_risk)
+```
+
+occupational_risk, PP
+
+```{r}
+densityplot(per_protocol_demimp, ~occupational_risk)
 ```
 
 smoke_tobacco, ITT
 
 ```{r}
 densityplot(demimp, ~smoke_tobacco)
-check_imputations(demimp$imp$smoke_tobacco, demog$smoke_tobacco)
 ```
 
 smoke_tobacco, PP
 
 ```{r}
 densityplot(per_protocol_demimp, ~smoke_tobacco)
-check_imputations(per_protocol_demimp$imp$smoke_tobacco, demog$smoke_tobacco)
 ```
 
+##MODEL CHECKS
 
+Influenza outcome, ITT cohort, unadjusted
+
+```{r}
+
+binnedplot(x=predict(FLU_itt_fit$analyses[[1]]), y=resid(FLU_itt_fit$analyses[[1]]))
+
+```
+
+Influenza outcome, ITT cohort, adjusted
+
+```{r}
+
+binnedplot(x=predict(FLU_itt_adjfit$analyses[[1]]), y=resid(FLU_itt_adjfit$analyses[[1]]))
+
+```
+
+Influenza outcome, PP cohort, unadjusted
+
+```{r}
+
+binnedplot(x=predict(FLU_pp_fit$analyses[[1]]), y=resid(FLU_pp_fit$analyses[[1]]))
+
+```
+
+Influenza outcome, PP cohort, adjusted
+
+```{r}
+
+binnedplot(x=predict(FLU_pp_adjfit$analyses[[1]]), y=resid(FLU_pp_adjfit$analyses[[1]]))
+
+```
+
+Residual vs predicted plots for one imputed dataset per model
+For logistic regression models: use binned residuals (observed-expected on y, predicted probability on x) with equal points per bin of x axis
+For Poisson regression models: use standardized residuals on y axis, predicted value on x
+Could also look at residuals as a function of covariates...\
