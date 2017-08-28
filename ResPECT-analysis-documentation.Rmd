@@ -14,8 +14,6 @@ library("MASS")
 library("dplyr")
 library("arm")
 load("/home/alexandria/Desktop/ARMS-models-workspace.rda")
-
-ls()  #items in the workspace
 ```
 
 ##Primary outcome, ITT and PP imputations
@@ -205,87 +203,115 @@ check_imputations(per_protocol_demimp$imp$age, per_protocol_demimp$data$age)
 
 Now look at the factor covariates
 
+Here's a function that makes sure we didn't miss any.
+
+```{r}
+
+all_nas <- function (imputed_data_object, real_dataset_column){
+  holder <- ifelse(nrow(imputed_data_object)==length(real_dataset_column[is.na(real_dataset_column)]), 
+       paste("ALL NAs IMPUTED (", nrow(imputed_data_object), ")", sep=""), "STOP! NA VALUES STILL PRESENT")
+  return(holder)
+}
+
+```
+
 mode_fpe_freq, ITT
 
 ```{r}
+all_nas(demimp$imp$mode_fpe_freq, demimp$data$mode_fpe_freq)
 densityplot(demimp, ~mode_fpe_freq)
 ```
 
 mode_fpe_freq, PP
 
 ```{r}
+all_nas(per_protocol_demimp$imp$mode_fpe_freq, per_protocol_demimp$data$mode_fpe_freq)
 densityplot(per_protocol_demimp, ~mode_fpe_freq)
 ```
 
 mode_hand_hyg, ITT
 
 ```{r}
+all_nas(demimp$imp$mode_hand_hyg, demimp$data$mode_hand_hyg)
 densityplot(demimp, ~mode_hand_hyg)
 ```
 
 mode_hand_hyg, PP
 
 ```{r}
+all_nas(per_protocol_demimp$imp$mode_hand_hyg, per_protocol_demimp$data$mode_hand_hyg)
 densityplot(per_protocol_demimp, ~mode_hand_hyg)
 ```
 
 vaccine_recieved, ITT
 
 ```{r}
+all_nas(demimp$imp$vaccine_recieved, demimp$data$vaccine_recieved)
 densityplot(demimp, ~vaccine_recieved)
 ```
 
 vaccine_recieved, PP
 
 ```{r}
+all_nas(per_protocol_demimp$imp$vaccine_recieved, per_protocol_demimp$data$vaccine_recieved)
 densityplot(per_protocol_demimp, ~vaccine_recieved)
 ```
 
 num_hhmem_0_5, ITT
 
 ```{r}
+all_nas(demimp$imp$num_hhmem_0_5, demimp$data$num_hhmem_0_5)
 densityplot(demimp, ~num_hhmem_0_5)
 ```
 
 num_hhmem_0_5, PP
 
 ```{r}
+all_nas(per_protocol_demimp$imp$num_hhmem_0_5, per_protocol_demimp$data$num_hhmem_0_5)
 densityplot(per_protocol_demimp, ~num_hhmem_0_5)
 ```
 
 race, ITT
 
 ```{r}
+all_nas(demimp$imp$race, demimp$data$race)
 densityplot(demimp, ~race)
 ```
 
 race, PP
 
 ```{r}
+all_nas(per_protocol_demimp$imp$race, per_protocol_demimp$data$race)
 densityplot(per_protocol_demimp, ~race)
 ```
 
 occupational_risk, ITT
 
 ```{r}
+all_nas(demimp$imp$occupational_risk, demimp$data$occupational_risk)
 densityplot(demimp, ~occupational_risk)
 ```
 
 occupational_risk, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~occupational_risk)
+all_nas(per_protocol_demimp$imp$occupational_risk, per_protocol_demimp$data$occupational_risk)
+#densityplot(per_protocol_demimp, ~occupational_risk)# only 1 missing, so this doesn't work
+per_protocol_demimp$imp$occupational_risk
+plot(per_protocol_demimp$data$occupational_risk) #here's the real data
 ```
 
 smoke_tobacco, ITT
 
 ```{r}
+all_nas(demimp$imp$smoke_tobacco, demimp$data$smoke_tobacco)
 densityplot(demimp, ~smoke_tobacco)
 ```
 
 smoke_tobacco, PP
 
 ```{r}
+all_nas(per_protocol_demimp$imp$smoke_tobacco, per_protocol_demimp$data$smoke_tobacco)
 densityplot(per_protocol_demimp, ~smoke_tobacco)
 ```
 
@@ -294,36 +320,133 @@ densityplot(per_protocol_demimp, ~smoke_tobacco)
 Influenza outcome, ITT cohort, unadjusted
 
 ```{r}
-
 binnedplot(x=predict(FLU_itt_fit$analyses[[1]]), y=resid(FLU_itt_fit$analyses[[1]]))
-
 ```
 
 Influenza outcome, ITT cohort, adjusted
 
 ```{r}
-
 binnedplot(x=predict(FLU_itt_adjfit$analyses[[1]]), y=resid(FLU_itt_adjfit$analyses[[1]]))
-
 ```
 
 Influenza outcome, PP cohort, unadjusted
 
 ```{r}
-
 binnedplot(x=predict(FLU_pp_fit$analyses[[1]]), y=resid(FLU_pp_fit$analyses[[1]]))
-
 ```
 
 Influenza outcome, PP cohort, adjusted
 
 ```{r}
-
 binnedplot(x=predict(FLU_pp_adjfit$analyses[[1]]), y=resid(FLU_pp_adjfit$analyses[[1]]))
+```
+
+For Poisson regression model.  Standardized residuals on y axis, predicted value on x
+Could also look at residuals as a function of covariates.
+
+#ARI outcome
+
+ARI_itt_fit
+
+```{r}
+plot(x=predict(ARI_itt_fit$analyses[[1]]), y=resid(ARI_itt_fit$analyses[[1]]))
 
 ```
 
-Residual vs predicted plots for one imputed dataset per model
-For logistic regression models: use binned residuals (observed-expected on y, predicted probability on x) with equal points per bin of x axis
-For Poisson regression models: use standardized residuals on y axis, predicted value on x
-Could also look at residuals as a function of covariates...\
+ARI_itt_adjfit
+
+```{r}
+plot(x=predict(ARI_itt_adjfit$analyses[[1]]), y=resid(ARI_itt_adjfit$analyses[[1]]))
+
+```
+
+ARI_pp_fit
+
+```{r}
+plot(x=predict(ARI_pp_fit$analyses[[1]]), y=resid(ARI_pp_fit$analyses[[1]]))
+```
+
+ARI_pp_adjfit
+
+```{r}
+plot(x=predict(ARI_pp_adjfit$analyses[[1]]), y=resid(ARI_pp_adjfit$analyses[[1]]))
+```
+
+#LCRI outcome
+
+LCRI_itt_fit
+
+```{r}
+plot(x=predict(LCRI_itt_fit$analyses[[1]]), y=resid(LCRI_itt_fit$analyses[[1]]))
+```
+
+LCRI_itt_adjfit
+
+```{r}
+plot(x=predict(LCRI_itt_adjfit$analyses[[1]]), y=resid(LCRI_itt_adjfit$analyses[[1]]))
+```
+
+LCRI_pp_fit
+
+```{r}
+plot(x=predict(LCRI_pp_fit$analyses[[1]]), y=resid(LCRI_pp_fit$analyses[[1]]))
+```
+
+LCRI_pp_adjfit
+
+```{r}
+plot(x=predict(LCRI_pp_adjfit$analyses[[1]]), y=resid(LCRI_pp_adjfit$analyses[[1]]))
+```
+
+#LDI outcome
+
+LDI_itt_fit
+
+```{r}
+plot(x=predict(LDI_itt_fit$analyses[[1]]), y=resid(LDI_itt_fit$analyses[[1]]))
+```
+
+LDI_itt_adjfit
+
+```{r}
+plot(x=predict(LDI_itt_adjfit$analyses[[1]]), y=resid(LDI_itt_adjfit$analyses[[1]]))
+```
+
+LDI_pp_fit
+
+```{r}
+plot(x=predict(LDI_pp_fit$analyses[[1]]), y=resid(LDI_pp_fit$analyses[[1]]))
+```
+
+LDI_pp_adjfit
+
+```{r}
+plot(x=predict(LDI_pp_adjfit$analyses[[1]]), y=resid(LDI_pp_adjfit$analyses[[1]]))
+```
+
+#ILI outcome
+
+ILI_itt_fit
+
+```{r}
+plot(x=predict(ILI_itt_fit$analyses[[1]]), y=resid(ILI_itt_fit$analyses[[1]]))
+```
+
+ILI_itt_adjfit
+
+```{r}
+plot(x=predict(ILI_itt_adjfit$analyses[[1]]), y=resid(ILI_itt_adjfit$analyses[[1]]))
+```
+
+ILI_pp_fit
+
+```{r}
+plot(x=predict(ILI_pp_fit$analyses[[1]]), y=resid(ILI_pp_fit$analyses[[1]]))
+```
+
+ILI_pp_adjfit
+
+```{r}
+plot(x=predict(ILI_pp_adjfit$analyses[[1]]), y=resid(ILI_pp_adjfit$analyses[[1]]))
+
+```

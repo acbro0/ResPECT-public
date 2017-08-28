@@ -1,6 +1,6 @@
-models <- readRDS("/home/lex/Desktop/ARMS-final-results.rds")
+models <- readRDS("/home/alexandria/Desktop/ARMS-final-results.rds")
 
-nums <- readRDS("/home/lex/Desktop/outcomes-final-numbers.rds")
+nums <- readRDS("/home/alexandria/Desktop/outcomes-final-numbers.rds")
 
 library("mice")
 library("dplyr")
@@ -130,3 +130,4 @@ tab <- select(resultstable, model_name2, n, OR_RR, CI)
 
 
 print(xtable(tab, type="html", digits=3))
+
