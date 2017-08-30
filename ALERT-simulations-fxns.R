@@ -286,14 +286,14 @@ real_compare_figs <- function(start_and_end, real_data, fig_label) {
 }
 
 
-  +
-    geom_rect(aes(xmin = start_and_end[9], 
-                  xmax = start_and_end[9], 
-                  ymin = -15, ymax = -5), alpha = 0.9) +
-    geom_rect(aes(xmin = start_and_end[10], 
-                  xmax = start_and_end[10], 
-                  ymin = -15, ymax = -5), alpha = 0.9) +
-    geom_rect(aes(xmin = start_and_end[11], 
-                  xmax = start_and_end[11], 
-                  ymin = -15, ymax = -5), alpha = 0.9) 
-}
+  #+
+   # geom_rect(aes(xmin = start_and_end[9], 
+#                  xmax = start_and_end[9], 
+#                  ymin = -15, ymax = -5), alpha = 0.9) +
+#    geom_rect(aes(xmin = start_and_end[10], 
+#                  xmax = start_and_end[10], 
+#                  ymin = -15, ymax = -5), alpha = 0.9) +
+#    geom_rect(aes(xmin = start_and_end[11], 
+#                  xmax = start_and_end[11], 
+#                  ymin = -15, ymax = -5), alpha = 0.9) 
+#}

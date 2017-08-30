@@ -496,17 +496,56 @@ grid.arrange(sim_compare_figs(start_and_end_real, selected_sims_real, 1, sims_me
 ######### TIME TO ANALYZE THE RESULTS  ############
 ###################################################
 
-summary.stats <- alertstats2 %>% group_by(parameter) %>% summarize(median(as.integer(median.dur)), 
-                                                                  median(test.median.dur), 
-                                                 median(as.numeric(median.pct.cases.captured)), 
-                                                 median(test.median.pct.cases.captured),
-                                                 median(as.numeric(mean.low.weeks.incl)),
-                                                 round(median(test.mean.low.weeks.incl), digits=1)) %>% data.frame
+##compare training to test statistics
+require(xtable)
+
+summary.stats <- alertstats %>% group_by(parameter) %>% summarize(
+  min(median.dur, na.rm=T),
+  max(median.dur, na.rm=T),
+  median(median.dur), 
+  min(test.median.dur, na.rm=T),
+  max(test.median.dur, na.rm=T),
+  median(test.median.dur), 
+  min(as.numeric(median.pct.cases.captured), na.rm=T),
+  max(as.numeric(median.pct.cases.captured), na.rm=T),
+  median(as.numeric(median.pct.cases.captured)), 
+  min(test.median.pct.cases.captured, na.rm=T),
+  max(test.median.pct.cases.captured, na.rm=T),
+  median(test.median.pct.cases.captured)) %>% data.frame
 
 rownames(summary.stats) <- summary.stats$parameter
 summary.stats$parameter <- NULL
 
-
-require(xtable)
+for(i in 1:nrow(summary.stats)){
+print(paste("[", summary.stats[i,1], ", ", summary.stats[i,2], "]; ", summary.stats[i,3], sep=""))
+}
 
 print(xtable(summary.stats), include.rownames=T)
+
+##compare low weeks captured between training and testing datasets
+
+lowweek.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
+  min(as.numeric(mean.low.weeks.incl), na.rm=T),
+  max(as.numeric(mean.low.weeks.incl), na.rm=T),
+  median(as.numeric(mean.low.weeks.incl)),
+  round(median(test.mean.low.weeks.incl), digits=1)) %>% data.frame
+
+rownames(lowweek.perform.stats) <- lowweek.perform.stats$parameter
+lowweek.perform.stats$parameter <- NULL
+print(xtable(lowweek.perform.stats), include.rownames=T)
+
+## compare pct peaks captured between training and testing datasets
+
+peakscap.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
+  min(pct.peaks.captured, na.rm=T), 
+  max(pct.peaks.captured, na.rm=T), 
+  median(pct.peaks.captured, na.rm=T), 
+  min(test.pct.peaks.captured, na.rm=T),
+  max(test.pct.peaks.captured, na.rm=T),
+  median(test.pct.peaks.captured, na.rm=T)) %>% data.frame
+
+rownames(peakscap.perform.stats) <- summary.stats$parameter
+peakscap.perform.stats$parameter <- NULL
+print(xtable(peakscap.perform.stats), include.rownames=T)
+
+

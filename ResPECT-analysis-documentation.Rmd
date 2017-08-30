@@ -13,7 +13,7 @@ library("gridExtra")
 library("MASS")
 library("dplyr")
 library("arm")
-load("/home/alexandria/Desktop/ARMS-models-workspace.rda")
+load("/home/lex/Desktop/ARMS-models-workspace.rda")
 ```
 
 ##Primary outcome, ITT and PP imputations
@@ -333,12 +333,14 @@ Influenza outcome, PP cohort, unadjusted
 
 ```{r}
 binnedplot(x=predict(FLU_pp_fit$analyses[[1]]), y=resid(FLU_pp_fit$analyses[[1]]))
+VarCorr(FLU_pp_fit$analyses[[1]])
 ```
 
 Influenza outcome, PP cohort, adjusted
 
 ```{r}
 binnedplot(x=predict(FLU_pp_adjfit$analyses[[1]]), y=resid(FLU_pp_adjfit$analyses[[1]]))
+VarCorr(FLU_pp_adjfit$analyses[[1]])
 ```
 
 For Poisson regression model.  Standardized residuals on y axis, predicted value on x
@@ -350,14 +352,12 @@ ARI_itt_fit
 
 ```{r}
 plot(x=predict(ARI_itt_fit$analyses[[1]]), y=resid(ARI_itt_fit$analyses[[1]]))
-
 ```
 
 ARI_itt_adjfit
 
 ```{r}
 plot(x=predict(ARI_itt_adjfit$analyses[[1]]), y=resid(ARI_itt_adjfit$analyses[[1]]))
-
 ```
 
 ARI_pp_fit
