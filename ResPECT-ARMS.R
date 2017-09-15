@@ -1,6 +1,6 @@
-models <- readRDS("/home/alexandria/Desktop/ARMS-final-results.rds")
+models <- readRDS("/home/lex/Desktop/ARMS-final-results.rds")
 
-nums <- readRDS("/home/alexandria/Desktop/outcomes-final-numbers.rds")
+nums <- readRDS("/home/lex/Desktop/outcomes-final-numbers.rds")
 
 library("mice")
 library("dplyr")
@@ -66,11 +66,11 @@ OR_plot <- ggplot(OR, aes(x=model_name, y = OR_RR)) +
   labs(y = "Odds Ratio", x = NULL) +              
   scale_x_discrete(limits=rev(OR$model_name), labels=rev(OR$model_name2)) +
   theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
-  #ggtitle("Risk Estimates for MM versus N95")+
+  ggtitle("Risk Estimates for N95 vs. MM (reference)")+
   theme(panel.grid.minor=element_blank())+
   annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_FLU_pp[3]), sep=""))+
   annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_FLU_itt[3]), sep="")) +
-  scale_y_log10(limits= c(0.65, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
+  scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
 
 RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +                     
   theme_bw() + 
@@ -80,7 +80,7 @@ RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +
   labs(y = "Relative Rate", x = NULL) +  
   scale_x_discrete(limits=rev(RR$model_name), labels=rev(RR$model_name2)) +
   theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
-  #ggtitle("Adjusted relative rate of HCW absenteeism")+
+  #ggtitle("Relative Risk for N95 vs. MM (reference)")+
   theme(panel.grid.minor=element_blank()) +
   annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_itt), sep=""))+
   annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_pp), sep="")) +
@@ -90,7 +90,7 @@ RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +
   annotate("text", x=11.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_pp), sep="")) +
   annotate("text", x=13.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_itt), sep=""))+
   annotate("text", x=15.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_pp), sep="")) +
-  scale_y_log10(limits= c(0.65, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
+  scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
 
 library("grid")
 #library(gridExtra)
@@ -112,7 +112,7 @@ names(nums)
 
 n <- c(as.numeric(nums$n_FLU_itt[3]), as.numeric(nums$n_FLU_pp[3]), 
   as.numeric(nums$n_ILI_itt), as.numeric(nums$n_ILI_pp), 
-  as.numeric(nums$n_ARI_itt), as.numeric(nums$n_ILI_pp),
+  as.numeric(nums$n_ARI_itt), as.numeric(nums$n_ARI_pp),
   as.numeric(nums$n_LCRI_itt), as.numeric(nums$n_LCRI_pp),
   as.numeric(nums$n_LDI_itt), as.numeric(nums$n_LDI_pp))
 
@@ -129,5 +129,6 @@ resultstable$CI <- paste("[", format(round(resultstable$CI_lower, 3), nsmall=3),
 tab <- select(resultstable, model_name2, n, OR_RR, CI)
 
 
-print(xtable(tab, type="html", digits=3))
 
+print(xtable(tab, type="html", digits=3))
+tab

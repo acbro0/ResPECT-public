@@ -13,7 +13,7 @@ library("gridExtra")
 library("MASS")
 library("dplyr")
 library("arm")
-load("/home/lex/Desktop/ARMS-models-workspace.rda")
+load("~/Desktop/ARMS-models-workspace.rda")
 ```
 
 ##Primary outcome, ITT and PP imputations
@@ -320,27 +320,47 @@ densityplot(per_protocol_demimp, ~smoke_tobacco)
 Influenza outcome, ITT cohort, unadjusted
 
 ```{r}
-binnedplot(x=predict(FLU_itt_fit$analyses[[1]]), y=resid(FLU_itt_fit$analyses[[1]]))
+
+for(i in 1:10){
+    pred_probs <- predict(FLU_itt_fit$analyses[[i]], type="response")
+    binnedplot(x=pred_probs, 
+               y=FLU_itt_fit$analyses[[i]]@resp$y-pred_probs)
+    readline()
+}
 ```
 
 Influenza outcome, ITT cohort, adjusted
 
 ```{r}
-binnedplot(x=predict(FLU_itt_adjfit$analyses[[1]]), y=resid(FLU_itt_adjfit$analyses[[1]]))
+for(i in 1:10){
+    pred_probs <- predict(FLU_itt_adjfit$analyses[[i]], type="response")
+    binnedplot(x=pred_probs, 
+               y=FLU_itt_adjfit$analyses[[i]]@resp$y-pred_probs)
+    readline()
+}
 ```
 
 Influenza outcome, PP cohort, unadjusted
 
 ```{r}
-binnedplot(x=predict(FLU_pp_fit$analyses[[1]]), y=resid(FLU_pp_fit$analyses[[1]]))
-VarCorr(FLU_pp_fit$analyses[[1]])
+for(i in 1:10){
+    pred_probs <- predict(FLU_pp_fit$analyses[[i]], type="response")
+    binnedplot(x=pred_probs, 
+               y=FLU_pp_fit$analyses[[i]]@resp$y-pred_probs)
+    readline()
+}
 ```
 
 Influenza outcome, PP cohort, adjusted
 
 ```{r}
-binnedplot(x=predict(FLU_pp_adjfit$analyses[[1]]), y=resid(FLU_pp_adjfit$analyses[[1]]))
-VarCorr(FLU_pp_adjfit$analyses[[1]])
+for(i in 1:10){
+    pred_probs <- predict(FLU_pp_adjfit$analyses[[i]], type="response")
+    binnedplot(x=pred_probs, 
+               y=FLU_pp_adjfit$analyses[[i]]@resp$y-pred_probs)
+    readline()
+}
+
 ```
 
 For Poisson regression model.  Standardized residuals on y axis, predicted value on x
@@ -351,25 +371,26 @@ Could also look at residuals as a function of covariates.
 ARI_itt_fit
 
 ```{r}
-plot(x=predict(ARI_itt_fit$analyses[[1]]), y=resid(ARI_itt_fit$analyses[[1]]))
+plot(ARI_itt_fit$analyses[[1]])
+## add a smooth line?
 ```
 
 ARI_itt_adjfit
 
 ```{r}
-plot(x=predict(ARI_itt_adjfit$analyses[[1]]), y=resid(ARI_itt_adjfit$analyses[[1]]))
+plot(ARI_itt_adjfit$analyses[[1]])
 ```
 
 ARI_pp_fit
 
 ```{r}
-plot(x=predict(ARI_pp_fit$analyses[[1]]), y=resid(ARI_pp_fit$analyses[[1]]))
+plot(ARI_pp_fit$analyses[[1]])
 ```
 
 ARI_pp_adjfit
 
 ```{r}
-plot(x=predict(ARI_pp_adjfit$analyses[[1]]), y=resid(ARI_pp_adjfit$analyses[[1]]))
+plot(ARI_pp_adjfit$analyses[[1]])
 ```
 
 #LCRI outcome
@@ -377,25 +398,25 @@ plot(x=predict(ARI_pp_adjfit$analyses[[1]]), y=resid(ARI_pp_adjfit$analyses[[1]]
 LCRI_itt_fit
 
 ```{r}
-plot(x=predict(LCRI_itt_fit$analyses[[1]]), y=resid(LCRI_itt_fit$analyses[[1]]))
+plot(LCRI_itt_fit$analyses[[1]])
 ```
 
 LCRI_itt_adjfit
 
 ```{r}
-plot(x=predict(LCRI_itt_adjfit$analyses[[1]]), y=resid(LCRI_itt_adjfit$analyses[[1]]))
+plot(LCRI_itt_adjfit$analyses[[1]])
 ```
 
 LCRI_pp_fit
 
 ```{r}
-plot(x=predict(LCRI_pp_fit$analyses[[1]]), y=resid(LCRI_pp_fit$analyses[[1]]))
+plot(LCRI_pp_fit$analyses[[1]])
 ```
 
 LCRI_pp_adjfit
 
 ```{r}
-plot(x=predict(LCRI_pp_adjfit$analyses[[1]]), y=resid(LCRI_pp_adjfit$analyses[[1]]))
+plot(LCRI_pp_adjfit$analyses[[1]])
 ```
 
 #LDI outcome
@@ -403,25 +424,25 @@ plot(x=predict(LCRI_pp_adjfit$analyses[[1]]), y=resid(LCRI_pp_adjfit$analyses[[1
 LDI_itt_fit
 
 ```{r}
-plot(x=predict(LDI_itt_fit$analyses[[1]]), y=resid(LDI_itt_fit$analyses[[1]]))
+plot(LDI_itt_fit$analyses[[1]])
 ```
 
 LDI_itt_adjfit
 
 ```{r}
-plot(x=predict(LDI_itt_adjfit$analyses[[1]]), y=resid(LDI_itt_adjfit$analyses[[1]]))
+plot(LDI_itt_adjfit$analyses[[1]])
 ```
 
 LDI_pp_fit
 
 ```{r}
-plot(x=predict(LDI_pp_fit$analyses[[1]]), y=resid(LDI_pp_fit$analyses[[1]]))
+plot(LDI_pp_fit$analyses[[1]])
 ```
 
 LDI_pp_adjfit
 
 ```{r}
-plot(x=predict(LDI_pp_adjfit$analyses[[1]]), y=resid(LDI_pp_adjfit$analyses[[1]]))
+plot(LDI_pp_adjfit$analyses[[1]])
 ```
 
 #ILI outcome
@@ -429,24 +450,24 @@ plot(x=predict(LDI_pp_adjfit$analyses[[1]]), y=resid(LDI_pp_adjfit$analyses[[1]]
 ILI_itt_fit
 
 ```{r}
-plot(x=predict(ILI_itt_fit$analyses[[1]]), y=resid(ILI_itt_fit$analyses[[1]]))
+plot(ILI_itt_fit$analyses[[1]])
 ```
 
 ILI_itt_adjfit
 
 ```{r}
-plot(x=predict(ILI_itt_adjfit$analyses[[1]]), y=resid(ILI_itt_adjfit$analyses[[1]]))
+plot(ILI_itt_adjfit$analyses[[1]])
 ```
 
 ILI_pp_fit
 
 ```{r}
-plot(x=predict(ILI_pp_fit$analyses[[1]]), y=resid(ILI_pp_fit$analyses[[1]]))
+plot(ILI_pp_fit$analyses[[1]])
 ```
 
 ILI_pp_adjfit
 
 ```{r}
-plot(x=predict(ILI_pp_adjfit$analyses[[1]]), y=resid(ILI_pp_adjfit$analyses[[1]]))
+plot(ILI_pp_adjfit$analyses[[1]])
 
 ```

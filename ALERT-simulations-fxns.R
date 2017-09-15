@@ -297,3 +297,8 @@ real_compare_figs <- function(start_and_end, real_data, fig_label) {
 #                  xmax = start_and_end[11], 
 #                  ymin = -15, ymax = -5), alpha = 0.9) 
 #}
+
+table_pretty <- function(min_val, max_val, median_val){
+  char_vec <- paste("[", min_val, ", ", max_val, "]; ", median_val, sep="")
+  return(char_vec)
+}

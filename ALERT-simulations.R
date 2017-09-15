@@ -296,10 +296,13 @@ med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold),
             median.pct.cases.captured = median(median.pct.cases.captured),
             median.test.low.weeks=median(test.mean.low.weeks.incl),
             median.train.low.weeks=median(mean.low.weeks.incl),
-            median.firstMonth=median(firstMonth)) %>%
+            median.firstMonth=median(firstMonth),
+            test.peaks=median(test.pct.peaks.captured, na.rm=T),
+            train.peaks=median(pct.peaks.captured, na.rm=T)) %>%
   mutate(duration.diff=train.median.dur-test.median.dur,
          median.pct.diff=median.pct.cases.captured-test.median.pct.cases.captured,
-         median.low.weeks.diff=median.train.low.weeks-median.test.low.weeks) %>%
+         median.low.weeks.diff=median.train.low.weeks-median.test.low.weeks,
+         peaks.pct.diff=train.peaks-test.peaks) %>%
   data.frame()
 
 ##alertstats2 holds the uncollapsed ALERT results
@@ -430,6 +433,21 @@ med.lowweeks.diff.performance <- ggplot(med.stats, group=parameter2) +
 
 med.lowweeks.diff.performance
 
+peaks.pct.diff.performance <- ggplot(med.stats, group=parameter2) +
+  # geom_point(aes(x=value, y=median.low.weeks.diff, color=threshold)) +
+  #scale_colour_gradient2(guide=guide_colorbar(direction="vertical"),
+  #                      limits=c(min(med.stats$threshold), (max(med.stats$threshold))), 
+  #                     low = "green", mid = "purple", high = "purple", 
+  #                    midpoint = max(med.stats$threshold)-1.5, na.value='grey') +
+  geom_smooth(aes(x=value, y=peaks.pct.diff), colour="black") +
+  facet_wrap(~parameter2, ncol=2, scales = "free_x", labeller = label_parsed)+
+  theme_classic() +
+  geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
+  xlab("parameter value")+
+  ylab("median percent peaks captured difference")
+
+peaks.pct.diff.performance
+
 ######################################
 ###### PLOT SOME FAKE DATA!!!! #######
 ######################################
@@ -482,14 +500,14 @@ sim_compare_figs(start_and_end_real, selected_sims_real, 6, sims_metadata = sims
 
 library(gridExtra)
 
-grid.arrange(sim_compare_figs(start_and_end_real, selected_sims_real, 1, sims_metadata_real), 
-             sim_compare_figs(start_and_end_real, selected_sims_real, 3, sims_metadata_real), 
-             sim_compare_figs(start_and_end_real, selected_sims_real, 2, sims_metadata_real),
-             sim_compare_figs(start_and_end_real, selected_sims_real, 9, sims_metadata_real), 
+grid.arrange(sim_compare_figs(start_and_end_real, selected_sims_real, 3, sims_metadata_real), 
+             sim_compare_figs(start_and_end_real, selected_sims_real, 5, sims_metadata_real), 
              sim_compare_figs(start_and_end_real, selected_sims_real, 7, sims_metadata_real),
+             sim_compare_figs(start_and_end_real, selected_sims_real, 1, sims_metadata_real), 
              sim_compare_figs(start_and_end_real, selected_sims_real, 10, sims_metadata_real),
+             sim_compare_figs(start_and_end_real, selected_sims_real, 2, sims_metadata_real),
              ncol=1, left="simulated cases", 
-             bottom="ALERT periods across time")
+             bottom="Date")
 
 
 ###################################################
@@ -516,27 +534,41 @@ summary.stats <- alertstats %>% group_by(parameter) %>% summarize(
 rownames(summary.stats) <- summary.stats$parameter
 summary.stats$parameter <- NULL
 
-for(i in 1:nrow(summary.stats)){
-print(paste("[", summary.stats[i,1], ", ", summary.stats[i,2], "]; ", summary.stats[i,3], sep=""))
-}
 
-print(xtable(summary.stats), include.rownames=T)
+summary_holder1 <- list()
+summary_holder2 <- list()
+summary_holder3 <- list()
+summary_holder4 <- list()
+for (i in 1:nrow(summary.stats)){
+  summary_holder1[i] <- print(table_pretty(summary.stats[i,1], summary.stats[i, 2], summary.stats[i, 3]))
+}
+for (i in 1:nrow(summary.stats)){
+  summary_holder2[i] <- print(table_pretty(summary.stats[i,4], summary.stats[i, 5], summary.stats[i, 6]))
+}
+for (i in 1:nrow(summary.stats)){
+  summary_holder3[i] <- print(table_pretty(summary.stats[i,7], summary.stats[i, 8], summary.stats[i, 9]))
+}
+for (i in 1:nrow(summary.stats)){
+  summary_holder4[i] <- print(table_pretty(summary.stats[i,10], summary.stats[i, 11], summary.stats[i, 12]))
+}
+tab <- cbind(summary_holder1, summary_holder2, summary_holder3, summary_holder4)
+
+colnames(tab) <- c("training; duration (weeks)", "testing; duration (weeks)", 
+                "training; cases (%)", "testing; cases (%)")
+
+rownames(tab) <- rownames(summary.stats)
+
+print(xtable(tab), include.rownames=T)
 
 ##compare low weeks captured between training and testing datasets
 
 lowweek.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
   min(as.numeric(mean.low.weeks.incl), na.rm=T),
   max(as.numeric(mean.low.weeks.incl), na.rm=T),
-  median(as.numeric(mean.low.weeks.incl)),
-  round(median(test.mean.low.weeks.incl), digits=1)) %>% data.frame
-
-rownames(lowweek.perform.stats) <- lowweek.perform.stats$parameter
-lowweek.perform.stats$parameter <- NULL
-print(xtable(lowweek.perform.stats), include.rownames=T)
-
-## compare pct peaks captured between training and testing datasets
-
-peakscap.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
+  median(as.numeric(mean.low.weeks.incl), na.rm=T),
+  min(test.mean.low.weeks.incl, na.rm=T),
+  max(test.mean.low.weeks.incl, na.rm=T),
+  median(test.mean.low.weeks.incl, na.rm=T),
   min(pct.peaks.captured, na.rm=T), 
   max(pct.peaks.captured, na.rm=T), 
   median(pct.peaks.captured, na.rm=T), 
@@ -544,8 +576,34 @@ peakscap.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
   max(test.pct.peaks.captured, na.rm=T),
   median(test.pct.peaks.captured, na.rm=T)) %>% data.frame
 
-rownames(peakscap.perform.stats) <- summary.stats$parameter
-peakscap.perform.stats$parameter <- NULL
-print(xtable(peakscap.perform.stats), include.rownames=T)
+rownames(lowweek.perform.stats) <- lowweek.perform.stats$parameter
+lowweek.perform.stats$parameter <- NULL
+
+summary_holder1 <- list()
+summary_holder2 <- list()
+summary_holder3 <- list()
+summary_holder4 <- list()
+for (i in 1:nrow(lowweek.perform.stats)){
+  summary_holder1[i] <- print(table_pretty(lowweek.perform.stats[i,1], lowweek.perform.stats[i, 2], lowweek.perform.stats[i, 3]))
+}
+for (i in 1:nrow(lowweek.perform.stats)){
+  summary_holder2[i] <- print(table_pretty(lowweek.perform.stats[i,4], lowweek.perform.stats[i, 5], lowweek.perform.stats[i, 6]))
+}
+for (i in 1:nrow(lowweek.perform.stats)){
+  summary_holder3[i] <- print(table_pretty(lowweek.perform.stats[i,7], lowweek.perform.stats[i, 8], lowweek.perform.stats[i, 9]))
+}
+for (i in 1:nrow(lowweek.perform.stats)){
+  summary_holder4[i] <- print(table_pretty(lowweek.perform.stats[i,10], lowweek.perform.stats[i, 11], lowweek.perform.stats[i, 12]))
+}
+tab <- cbind(summary_holder1, summary_holder2, summary_holder3, summary_holder4)
+
+colnames(tab) <- c("training; low weeks (weeks)", "testing; low weeks (weeks)", 
+                   "training; peaks captured (%)", "testing; peaks captured (%)")
+
+rownames(tab) <- rownames(lowweek.perform.stats)
+
+print(xtable(tab), include.rownames=T)
+
+
 
 
