@@ -34,7 +34,7 @@ Influenza outcome imputations, ITT cohort
 get_ratio(demog$Influenza) # the ratio of affected participants
 hist(as.numeric(apply(demimp$imp$Influenza, 2, get_ratio)), 
      round(digits=10)) # histogram showing spread of ratio in ITT imputations
-densityplot(demimp, ~Influenza) # blue line is the raw data, red is ITT imputed
+#densityplot(demimp, ~Influenza) # blue line is the raw data, red is ITT imputed
 ```
 
 Influenza outcome imputations, PP cohort
@@ -43,7 +43,7 @@ Influenza outcome imputations, PP cohort
 get_ratio(pp$Influenza)
 hist(as.numeric(apply(per_protocol_demimp$imp$Influenza, 2, get_ratio)), 
      round(digits=10)) # histogram showing spread of ratio in PP imputations
-densityplot(per_protocol_demimp, ~Influenza) # blue line is the raw data, red is PP imputed
+##densityplot(per_protocol_demimp, ~Influenza) # blue line is the raw data, red is PP imputed
 ```
 
 ##Secondary outcomes
@@ -89,56 +89,56 @@ For each secondary outcome, there is a density plot in which imputation density 
 ARI, ITT
 
 ```{r}
-densityplot(demimp, ~ARI_events)
+#densityplot(demimp, ~ARI_events)
 check_imputations(demimp$imp$ARI_events, demimp$data$ARI_events)
 ```
 
 ARI, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~ARI_events)
+#densityplot(per_protocol_demimp, ~ARI_events)
 check_imputations(per_protocol_demimp$imp$ARI_events, per_protocol_demimp$data$ARI_events)
 ```
 
 LCRI, ITT
 
 ```{r}
-densityplot(demimp, ~LCRI_events)
+#densityplot(demimp, ~LCRI_events)
 check_imputations(demimp$imp$LCRI_events, demimp$data$LCRI_events)
 ```
 
 LCRI, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~LCRI_events)
+#densityplot(per_protocol_demimp, ~LCRI_events)
 check_imputations(per_protocol_demimp$imp$LCRI_events, per_protocol_demimp$data$LCRI_events)
 ```
 
 LDI, ITT
 
 ```{r}
-densityplot(demimp, ~LDI_events)
+#densityplot(demimp, ~LDI_events)
 check_imputations(demimp$imp$LDI_events, demimp$data$LDI_events)
 ```
 
 LDI, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~LDI_events)
+#densityplot(per_protocol_demimp, ~LDI_events)
 check_imputations(per_protocol_demimp$imp$LDI_events, per_protocol_demimp$data$LDI_events)
 ```
 
 ILI, ITT
 
 ```{r}
-densityplot(demimp, ~ILI_events)
+#densityplot(demimp, ~ILI_events)
 check_imputations(demimp$imp$ILI_events, demimp$data$ILI_events)
 ```
 
 ILI, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~ILI_events)
+#densityplot(per_protocol_demimp, ~ILI_events)
 check_imputations(per_protocol_demimp$imp$ILI_events, per_protocol_demimp$data$ILI_events)
 ```
 
@@ -172,7 +172,7 @@ imp_qqplot <- function(imputed_data_object, real_dataset_column){
 URI_exposure_perc, ITT
 
 ```{r}
-densityplot(demimp, ~URI_exposure_perc)
+#densityplot(demimp, ~URI_exposure_perc)
 imp_qqplot(demimp$imp$URI_exposure_perc, demimp$data$URI_exposure_perc)
 check_imputations(demimp$imp$URI_exposure_perc, demimp$data$URI_exposure_perc)
 ```
@@ -180,7 +180,7 @@ check_imputations(demimp$imp$URI_exposure_perc, demimp$data$URI_exposure_perc)
 URI_exposure_perc, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~URI_exposure_perc)
+#densityplot(per_protocol_demimp, ~URI_exposure_perc)
 imp_qqplot(per_protocol_demimp$imp$URI_exposure_perc, per_protocol_demimp$data$URI_exposure_perc)
 check_imputations(per_protocol_demimp$imp$URI_exposure_perc, per_protocol_demimp$data$URI_exposure_perc)
 ```
@@ -188,7 +188,7 @@ check_imputations(per_protocol_demimp$imp$URI_exposure_perc, per_protocol_demimp
 age, ITT
 
 ```{r}
-densityplot(demimp, ~age)
+#densityplot(demimp, ~age)
 imp_qqplot(demimp$imp$age, demimp$data$age)
 check_imputations(demimp$imp$age, demimp$data$age)
 ```
@@ -196,7 +196,7 @@ check_imputations(demimp$imp$age, demimp$data$age)
 age, PP
 
 ```{r}
-densityplot(per_protocol_demimp, ~age)
+#densityplot(per_protocol_demimp, ~age)
 imp_qqplot(per_protocol_demimp$imp$age, per_protocol_demimp$data$age)
 check_imputations(per_protocol_demimp$imp$age, per_protocol_demimp$data$age)
 ```
@@ -219,84 +219,84 @@ mode_fpe_freq, ITT
 
 ```{r}
 all_nas(demimp$imp$mode_fpe_freq, demimp$data$mode_fpe_freq)
-densityplot(demimp, ~mode_fpe_freq)
+#densityplot(demimp, ~mode_fpe_freq)
 ```
 
 mode_fpe_freq, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$mode_fpe_freq, per_protocol_demimp$data$mode_fpe_freq)
-densityplot(per_protocol_demimp, ~mode_fpe_freq)
+#densityplot(per_protocol_demimp, ~mode_fpe_freq)
 ```
 
 mode_hand_hyg, ITT
 
 ```{r}
 all_nas(demimp$imp$mode_hand_hyg, demimp$data$mode_hand_hyg)
-densityplot(demimp, ~mode_hand_hyg)
+#densityplot(demimp, ~mode_hand_hyg)
 ```
 
 mode_hand_hyg, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$mode_hand_hyg, per_protocol_demimp$data$mode_hand_hyg)
-densityplot(per_protocol_demimp, ~mode_hand_hyg)
+#densityplot(per_protocol_demimp, ~mode_hand_hyg)
 ```
 
 vaccine_recieved, ITT
 
 ```{r}
 all_nas(demimp$imp$vaccine_recieved, demimp$data$vaccine_recieved)
-densityplot(demimp, ~vaccine_recieved)
+#densityplot(demimp, ~vaccine_recieved)
 ```
 
 vaccine_recieved, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$vaccine_recieved, per_protocol_demimp$data$vaccine_recieved)
-densityplot(per_protocol_demimp, ~vaccine_recieved)
+#densityplot(per_protocol_demimp, ~vaccine_recieved)
 ```
 
 num_hhmem_0_5, ITT
 
 ```{r}
 all_nas(demimp$imp$num_hhmem_0_5, demimp$data$num_hhmem_0_5)
-densityplot(demimp, ~num_hhmem_0_5)
+#densityplot(demimp, ~num_hhmem_0_5)
 ```
 
 num_hhmem_0_5, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$num_hhmem_0_5, per_protocol_demimp$data$num_hhmem_0_5)
-densityplot(per_protocol_demimp, ~num_hhmem_0_5)
+#densityplot(per_protocol_demimp, ~num_hhmem_0_5)
 ```
 
 race, ITT
 
 ```{r}
 all_nas(demimp$imp$race, demimp$data$race)
-densityplot(demimp, ~race)
+#densityplot(demimp, ~race)
 ```
 
 race, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$race, per_protocol_demimp$data$race)
-densityplot(per_protocol_demimp, ~race)
+#densityplot(per_protocol_demimp, ~race)
 ```
 
 occupational_risk, ITT
 
 ```{r}
 all_nas(demimp$imp$occupational_risk, demimp$data$occupational_risk)
-densityplot(demimp, ~occupational_risk)
+#densityplot(demimp, ~occupational_risk)
 ```
 
 occupational_risk, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$occupational_risk, per_protocol_demimp$data$occupational_risk)
-#densityplot(per_protocol_demimp, ~occupational_risk)# only 1 missing, so this doesn't work
+##densityplot(per_protocol_demimp, ~occupational_risk)# only 1 missing, so this doesn't work
 per_protocol_demimp$imp$occupational_risk
 plot(per_protocol_demimp$data$occupational_risk) #here's the real data
 ```
@@ -305,14 +305,14 @@ smoke_tobacco, ITT
 
 ```{r}
 all_nas(demimp$imp$smoke_tobacco, demimp$data$smoke_tobacco)
-densityplot(demimp, ~smoke_tobacco)
+#densityplot(demimp, ~smoke_tobacco)
 ```
 
 smoke_tobacco, PP
 
 ```{r}
 all_nas(per_protocol_demimp$imp$smoke_tobacco, per_protocol_demimp$data$smoke_tobacco)
-densityplot(per_protocol_demimp, ~smoke_tobacco)
+#densityplot(per_protocol_demimp, ~smoke_tobacco)
 ```
 
 ##MODEL CHECKS
@@ -381,7 +381,7 @@ ittholder$residuals <- resid(ARI_itt_fit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ARI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -403,7 +403,7 @@ ittholder$residuals <- resid(ARI_itt_adjfit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ARI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -427,7 +427,7 @@ ppholder$residuals <- resid(ARI_pp_fit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ARI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -449,7 +449,7 @@ ppholder$residuals <- resid(ARI_pp_adjfit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ARI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -475,7 +475,7 @@ ittholder$residuals <- resid(LCRI_itt_fit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LCRI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -497,7 +497,7 @@ ittholder$residuals <- resid(LCRI_itt_adjfit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LCRI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -521,7 +521,7 @@ ppholder$residuals <- resid(LCRI_pp_fit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LCRI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -543,7 +543,7 @@ ppholder$residuals <- resid(LCRI_pp_adjfit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LCRI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -569,7 +569,7 @@ ittholder$residuals <- resid(LDI_itt_fit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LDI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -591,7 +591,7 @@ ittholder$residuals <- resid(LDI_itt_adjfit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LDI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -615,7 +615,7 @@ ppholder$residuals <- resid(LDI_pp_fit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LDI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -637,7 +637,7 @@ ppholder$residuals <- resid(LDI_pp_adjfit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of LDI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -663,7 +663,7 @@ ittholder$residuals <- resid(ILI_itt_fit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ILI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -685,7 +685,7 @@ ittholder$residuals <- resid(ILI_itt_adjfit$analyses[[1]], type="pearson")
 ggplot(ittholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ILI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -709,7 +709,7 @@ ppholder$residuals <- resid(ILI_pp_fit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ILI events", y = "Residuals")
 
 #plot predicted vs actual
@@ -731,7 +731,7 @@ ppholder$residuals <- resid(ILI_pp_adjfit$analyses[[1]], type="pearson")
 ggplot(ppholder)+ 
   geom_point(aes(x = predicted, y = residuals, color=ARM)) +
  theme_bw() +
-geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1, span=1.75) +
   labs(x = "Predicted number of ILI events", y = "Residuals")
 
 #plot predicted vs actual
