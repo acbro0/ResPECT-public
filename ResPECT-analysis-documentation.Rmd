@@ -371,26 +371,93 @@ Could also look at residuals as a function of covariates.
 ARI_itt_fit
 
 ```{r}
-plot(ARI_itt_fit$analyses[[1]])
-## add a smooth line?
+ittholder <- complete(demimp)
+
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(ARI_itt_fit$analyses[[1]], type="response")
+ittholder$residuals <- resid(ARI_itt_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ARI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ARI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ARI_events), size=1) +
+  labs(x = "Expected ARI events", y = "Observed ARI events")
 ```
 
 ARI_itt_adjfit
 
 ```{r}
-plot(ARI_itt_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(ARI_itt_adjfit$analyses[[1]], type="response")
+ittholder$residuals <- resid(ARI_itt_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ARI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ARI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ARI_events), size=1) +
+  labs(x = "Expected ARI events", y = "Observed ARI events")
 ```
 
 ARI_pp_fit
 
 ```{r}
-plot(ARI_pp_fit$analyses[[1]])
+ppholder <- complete(per_protocol_demimp)
+
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(ARI_pp_fit$analyses[[1]], type="response")
+ppholder$residuals <- resid(ARI_pp_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ARI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ARI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ARI_events), size=1) +
+  labs(x = "Expected ARI events", y = "Observed ARI events")
 ```
 
 ARI_pp_adjfit
 
 ```{r}
-plot(ARI_pp_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(ARI_pp_adjfit$analyses[[1]], type="response")
+ppholder$residuals <- resid(ARI_pp_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ARI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ARI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ARI_events), size=1) +
+  labs(x = "Expected ARI events", y = "Observed ARI events")
 ```
 
 #LCRI outcome
@@ -398,25 +465,93 @@ plot(ARI_pp_adjfit$analyses[[1]])
 LCRI_itt_fit
 
 ```{r}
-plot(LCRI_itt_fit$analyses[[1]])
+ittholder <- complete(demimp)
+
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(LCRI_itt_fit$analyses[[1]], type="response")
+ittholder$residuals <- resid(LCRI_itt_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LCRI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LCRI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LCRI_events), size=1) +
+  labs(x = "Expected LCRI events", y = "Observed LCRI events")
 ```
 
 LCRI_itt_adjfit
 
 ```{r}
-plot(LCRI_itt_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(LCRI_itt_adjfit$analyses[[1]], type="response")
+ittholder$residuals <- resid(LCRI_itt_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LCRI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LCRI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LCRI_events), size=1) +
+  labs(x = "Expected LCRI events", y = "Observed LCRI events")
 ```
 
 LCRI_pp_fit
 
 ```{r}
-plot(LCRI_pp_fit$analyses[[1]])
+ppholder <- complete(per_protocol_demimp)
+
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(LCRI_pp_fit$analyses[[1]], type="response")
+ppholder$residuals <- resid(LCRI_pp_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LCRI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LCRI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LCRI_events), size=1) +
+  labs(x = "Expected LCRI events", y = "Observed LCRI events")
 ```
 
 LCRI_pp_adjfit
 
 ```{r}
-plot(LCRI_pp_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(LCRI_pp_adjfit$analyses[[1]], type="response")
+ppholder$residuals <- resid(LCRI_pp_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LCRI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LCRI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LCRI_events), size=1) +
+  labs(x = "Expected LCRI events", y = "Observed LCRI events")
 ```
 
 #LDI outcome
@@ -424,25 +559,93 @@ plot(LCRI_pp_adjfit$analyses[[1]])
 LDI_itt_fit
 
 ```{r}
-plot(LDI_itt_fit$analyses[[1]])
+ittholder <- complete(demimp)
+
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(LDI_itt_fit$analyses[[1]], type="response")
+ittholder$residuals <- resid(LDI_itt_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LDI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LDI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LDI_events), size=1) +
+  labs(x = "Expected LDI events", y = "Observed LDI events")
 ```
 
 LDI_itt_adjfit
 
 ```{r}
-plot(LDI_itt_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(LDI_itt_adjfit$analyses[[1]], type="response")
+ittholder$residuals <- resid(LDI_itt_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LDI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LDI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LDI_events), size=1) +
+  labs(x = "Expected LDI events", y = "Observed LDI events")
 ```
 
 LDI_pp_fit
 
 ```{r}
-plot(LDI_pp_fit$analyses[[1]])
+ppholder <- complete(per_protocol_demimp)
+
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(LDI_pp_fit$analyses[[1]], type="response")
+ppholder$residuals <- resid(LDI_pp_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LDI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LDI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LDI_events), size=1) +
+  labs(x = "Expected LDI events", y = "Observed LDI events")
 ```
 
 LDI_pp_adjfit
 
 ```{r}
-plot(LDI_pp_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(LDI_pp_adjfit$analyses[[1]], type="response")
+ppholder$residuals <- resid(LDI_pp_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of LDI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = LDI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = LDI_events), size=1) +
+  labs(x = "Expected LDI events", y = "Observed LDI events")
 ```
 
 #ILI outcome
@@ -450,24 +653,91 @@ plot(LDI_pp_adjfit$analyses[[1]])
 ILI_itt_fit
 
 ```{r}
-plot(ILI_itt_fit$analyses[[1]])
+ittholder <- complete(demimp)
+
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(ILI_itt_fit$analyses[[1]], type="response")
+ittholder$residuals <- resid(ILI_itt_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ILI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ILI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ILI_events), size=1) +
+  labs(x = "Expected ILI events", y = "Observed ILI events")
 ```
 
 ILI_itt_adjfit
 
 ```{r}
-plot(ILI_itt_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ittholder$predicted <- predict(ILI_itt_adjfit$analyses[[1]], type="response")
+ittholder$residuals <- resid(ILI_itt_adjfit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ittholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ILI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ILI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ILI_events), size=1) +
+  labs(x = "Expected ILI events", y = "Observed ILI events")
 ```
 
 ILI_pp_fit
 
 ```{r}
-plot(ILI_pp_fit$analyses[[1]])
+ppholder <- complete(per_protocol_demimp)
+
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(ILI_pp_fit$analyses[[1]], type="response")
+ppholder$residuals <- resid(ILI_pp_fit$analyses[[1]], type="pearson")
+
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ILI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ILI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ILI_events), size=1) +
+  labs(x = "Expected ILI events", y = "Observed ILI events")
 ```
 
 ILI_pp_adjfit
 
 ```{r}
-plot(ILI_pp_adjfit$analyses[[1]])
+## calculate and store predicted values and residuals
+ppholder$predicted <- predict(ILI_pp_adjfit$analyses[[1]], type="response")
+ppholder$residuals <- resid(ILI_pp_adjfit$analyses[[1]], type="pearson")
 
+#plot predicted vs residual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = residuals, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = residuals), method = "loess", size=1) +
+  labs(x = "Predicted number of ILI events", y = "Residuals")
+
+#plot predicted vs actual
+ggplot(ppholder)+ 
+  geom_point(aes(x = predicted, y = ILI_events, color=ARM)) +
+ theme_bw() +
+geom_smooth(aes(x = predicted, y = ILI_events), size=1) +
+  labs(x = "Expected ILI events", y = "Observed ILI events")
 ```
