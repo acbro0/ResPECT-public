@@ -2,6 +2,7 @@
 source("~/Documents/ResPECT-public/ALERT-simulations-fxns.R")
 
 library("dplyr")
+library("xtable")
 require(lubridate); year <- lubridate::year
 
 
@@ -67,10 +68,13 @@ holder <- chco.dat_res$coefficients
 
 all <- data.frame(data.table::rbindlist(lapply(holder,as.list)))
 
-colnames(all[1]) <- "coefficients derived from CHCO dataset"
+#coefnames <- names(holder)
+rownames(all) <- c("lambda", "alpha", "beta",
+                   "gamma", "delta", "psi")
 
-coefnames <- names(holder)
-#rownames(all) <- bugnames
+all[,2] <- data.frame(data.table::rbindlist(lapply(chco.dat_res$se,as.list)))
+
+colnames(all) <- c("Estimated coefficients", "SE")
 
 print(xtable(all, type="html", digits=4))
 
