@@ -1,3 +1,5 @@
+rm(list=ls())
+
 models <- readRDS("/home/lex/Desktop/ARMS-final-results.rds")
 
 nums <- readRDS("/home/lex/Desktop/outcomes-final-numbers.rds")
@@ -27,26 +29,49 @@ for (i in 1:length(names(models))){
 
 ##reorder by number of observations.
 
-resultstable$model_name2 <- c("Influenza Outcome: ITT Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "Influenza Outcome: PP Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "ILI Outcome: ITT Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "ILI Outcome: PP Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "ARI Outcome: ITT Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "ARI Outcome: PP Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "LCRI Outcome: ITT Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "LCRI Outcome: PP Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "LDI Outcome: ITT Cohort, Unadjusted",
-                                                                        "Adjusted",
-                                                                        "LDI Outcome: PP Cohort, Unadjusted",
-                                                                        "Adjusted")
+##Lew doesn't want superscripts anymore. 
+#resultstable$model_name2 <- c(bquote(paste("LC", I^2, " Outcome: ITT Cohort, Unadjusted", sep="")),
+#                               "Adjusted",
+#                               "LCI Outcome: PP Cohort, Unadjusted",
+#                               "Adjusted",
+#                               bquote(paste("IL", I^6, " Outcome: ITT Cohort, Unadjusted", sep="")),
+#                               "Adjusted",
+#                               "ILI Outcome: PP Cohort, Unadjusted",
+#                               "Adjusted",
+#                               bquote(paste("AR", I^3, " Outcome: ITT Cohort, Unadjusted", sep="")),
+#                               "Adjusted",
+#                               "ARI Outcome: PP Cohort, Unadjusted",
+#                               "Adjusted",
+#                               bquote(paste("LCR", I^5, " Outcome: ITT Cohort, Unadjusted", sep="")),
+#                               "Adjusted",
+#                              "LCRI Outcome: PP Cohort, Unadjusted",
+#                             "Adjusted",
+#                               bquote(paste("LDR", I^4, " Outcome: ITT Cohort, Unadjusted", sep="")),
+#                               "Adjusted",
+#                               "LDRI Outcome: PP Cohort, Unadjusted",
+#                               "Adjusted")
+
+
+resultstable$model_name2 <- c("LCI Outcome: ITT Cohort, Unadjusted",
+                               "Adjusted",
+                               "LCI Outcome: PP Cohort, Unadjusted",
+                               "Adjusted",
+                               "ILI Outcome: ITT Cohort, Unadjusted",
+                               "Adjusted",
+                               "ILI Outcome: PP Cohort, Unadjusted",
+                               "Adjusted",
+                               "ARI Outcome: ITT Cohort, Unadjusted",
+                               "Adjusted",
+                               "ARI Outcome: PP Cohort, Unadjusted",
+                               "Adjusted",
+                               "LCRI Outcome: ITT Cohort, Unadjusted",
+                               "Adjusted",
+                              "LCRI Outcome: PP Cohort, Unadjusted",
+                             "Adjusted",
+                               "LDRI Outcome: ITT Cohort, Unadjusted",
+                               "Adjusted",
+                               "LDRI Outcome: PP Cohort, Unadjusted",
+                               "Adjusted")
 
 resultstable$model_name <- factor(resultstable$model_name, 
                                   levels = resultstable$model_name[order(rev(resultstable$model_name2))])
@@ -63,13 +88,15 @@ OR_plot <- ggplot(OR, aes(x=model_name, y = OR_RR)) +
   geom_pointrange (aes (ymin = CI_lower, ymax = CI_upper)) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Odds Ratio", x = NULL) +              
+  labs(y = NULL, x = NULL) +              
   scale_x_discrete(limits=rev(OR$model_name), labels=rev(OR$model_name2)) +
-  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
-  ggtitle("Risk Estimates for N95 vs. MM (reference)")+
+  theme(axis.text = element_text(size=10),  
+        axis.title=element_text(size=11,face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  ggtitle("Influenza (Primary) Outcomes Odds Ratios")+
   theme(panel.grid.minor=element_blank())+
-  annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_FLU_pp[3]), sep=""))+
-  annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_FLU_itt[3]), sep="")) +
+  annotate("text", x=1.5, y=0.64, label=paste("n=", as.numeric(nums$n_FLU_pp[3]), sep=""))+
+  annotate("text", x=3.5, y=0.64, label=paste("n=", as.numeric(nums$n_FLU_itt[3]), sep="")) +
   scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
 
 RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +                     
@@ -77,19 +104,21 @@ RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +
   geom_pointrange (aes (ymin = CI_lower, ymax = CI_upper)) +              
   coord_flip() +               
   geom_hline(aes(yintercept=1), lty=2) +           
-  labs(y = "Relative Rate", x = NULL) +  
+  labs(y = NULL, x = NULL) +  
   scale_x_discrete(limits=rev(RR$model_name), labels=rev(RR$model_name2)) +
-  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
-  #ggtitle("Relative Risk for N95 vs. MM (reference)")+
+  theme(axis.text = element_text(size=10),  
+        axis.title=element_text(size=11,face="bold"), 
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  ggtitle("All Viral Respiratory Infections and Illnesses (Secondary) Outcomes Relative Rates")+
   theme(panel.grid.minor=element_blank()) +
-  annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_itt), sep=""))+
-  annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_pp), sep="")) +
-  annotate("text", x=5.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_itt), sep=""))+
-  annotate("text", x=7.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_pp), sep="")) +
-  annotate("text", x=9.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_itt), sep=""))+
-  annotate("text", x=11.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_pp), sep="")) +
-  annotate("text", x=13.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_itt), sep=""))+
-  annotate("text", x=15.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_pp), sep="")) +
+  annotate("text", x=1.5, y=0.64, label=paste("n=", as.numeric(nums$n_ILI_itt), sep=""))+
+  annotate("text", x=3.5, y=0.64, label=paste("n=", as.numeric(nums$n_ILI_pp), sep="")) +
+  annotate("text", x=5.5, y=0.64, label=paste("n=", as.numeric(nums$n_LCRI_itt), sep=""))+
+  annotate("text", x=7.5, y=0.64, label=paste("n=", as.numeric(nums$n_LCRI_pp), sep="")) +
+  annotate("text", x=9.5, y=0.64, label=paste("n=", as.numeric(nums$n_LDI_itt), sep=""))+
+  annotate("text", x=11.5, y=0.64, label=paste("n=", as.numeric(nums$n_LDI_pp), sep="")) +
+  annotate("text", x=13.5, y=0.64, label=paste("n=", as.numeric(nums$n_ARI_itt), sep=""))+
+  annotate("text", x=15.5, y=0.64, label=paste("n=", as.numeric(nums$n_ARI_pp), sep="")) +
   scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
 
 library("grid")
@@ -122,13 +151,192 @@ n <- as.character(rep(n, each=2))
 
 resultstable$n <- n
 
-resultstable$CI <- paste("[", format(round(resultstable$CI_lower, 3), nsmall=3), 
+resultstable$CI <- paste("[", format(round(resultstable$CI_lower, 2), nsmall=2), 
                          ", ", 
-                         format(round(resultstable$CI_upper, 3), nsmall=3), "]", sep="")
+                         format(round(resultstable$CI_upper, 2), nsmall=2), "]", sep="")
 
 tab <- select(resultstable, model_name2, n, OR_RR, CI)
 
+tab <- rbind(tab[1:4,], tab[9:12,], tab[17:20,], tab[13:16,], tab[5:8,])
 
 
-print(xtable(tab, type="html", digits=3))
+print(xtable(tab, type="html", digits=2))
 tab
+
+
+### try putting the table on the plot.
+
+OR_plot <- ggplot(OR, aes(x=model_name, y = OR_RR)) +                     
+  theme_bw() + 
+  geom_pointrange (aes (ymin = CI_lower, ymax = CI_upper)) +              
+  coord_flip() +               
+  geom_hline(aes(yintercept=1), lty=2) +           
+  labs(y = "Odds Ratio", x = NULL) +              
+  scale_x_discrete(limits=rev(OR$model_name), labels=rev(OR$model_name2)) +
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
+  ggtitle("Risk Estimates for N95 vs. MM (reference)")+
+  labs(size = 1) +
+  theme(panel.grid.minor=element_blank())+
+  annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_FLU_pp[3]), sep=""))+
+  annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_FLU_itt[3]), sep="")) +
+  annotate("text", x=4, y=1.57, label=paste(round(tab$OR_RR[1], digits=2), "; ", tab$CI[1], sep="")) +
+  annotate("text", x=3, y=1.57, label=paste(round(tab$OR_RR[2], digits=2), "; ", tab$CI[2], sep="")) +
+  annotate("text", x=2, y=1.57, label=paste(round(tab$OR_RR[3], digits=2), "; ", tab$CI[3], sep="")) +
+  annotate("text", x=1, y=1.57, label=paste(sprintf("%.2f", round(tab$OR_RR[4], digits=2)), "; ", tab$CI[4], sep="")) +
+  scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
+
+RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +                   
+  theme_bw() + 
+  geom_pointrange (aes (ymin = CI_lower, ymax = CI_upper)) +              
+  coord_flip() +               
+  geom_hline(aes(yintercept=1), lty=2) +           
+  labs(y = "Relative Rate", x = NULL) +  
+  scale_x_discrete(limits=rev(RR$model_name), labels=rev(RR$model_name2)) +
+  theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
+  #ggtitle("Relative Risk for N95 vs. MM (reference)")+
+  theme(panel.grid.minor=element_blank()) +
+  annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_pp), sep=""))+
+  annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_itt), sep="")) +
+  annotate("text", x=5.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_pp), sep=""))+
+  annotate("text", x=7.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_itt), sep="")) +
+  annotate("text", x=9.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_pp), sep=""))+
+  annotate("text", x=11.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_itt), sep="")) +
+  annotate("text", x=13.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_pp), sep=""))+
+  annotate("text", x=15.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_itt), sep="")) +
+  annotate("text", x=16, y=1.57, label=paste(round(tab$OR_RR[5], digits=2), "; ", tab$CI[5], sep="")) +
+  annotate("text", x=15, y=1.57, label=paste(round(tab$OR_RR[6], digits=2), "; ", tab$CI[6], sep="")) +
+  annotate("text", x=14, y=1.57, label=paste(round(tab$OR_RR[7], digits=2), "; ", tab$CI[7], sep="")) +
+  annotate("text", x=13, y=1.57, label=paste(sprintf("%.2f", round(tab$OR_RR[8], digits=2)), "; ", tab$CI[8], sep="")) +
+  annotate("text", x=12, y=1.57, label=paste(round(tab$OR_RR[9], digits=2), "; ", tab$CI[9], sep="")) +
+  annotate("text", x=11, y=1.57, label=paste(round(tab$OR_RR[10], digits=2), "; ", tab$CI[10], sep="")) +
+  annotate("text", x=10, y=1.57, label=paste(round(tab$OR_RR[11], digits=2), "; ", tab$CI[11], sep="")) +
+  annotate("text", x=9, y=1.57, label=paste(round(tab$OR_RR[12], digits=2), "; ", tab$CI[12], sep="")) +
+  annotate("text", x=8, y=1.57, label=paste(round(tab$OR_RR[13], digits=2), "; ", tab$CI[13], sep="")) +
+  annotate("text", x=7, y=1.57, label=paste(round(tab$OR_RR[14], digits=2), "; ", tab$CI[14], sep="")) +
+  annotate("text", x=6, y=1.57, label=paste(round(tab$OR_RR[15], digits=2), "; ", tab$CI[15], sep="")) +
+  annotate("text", x=5, y=1.57, label=paste(round(tab$OR_RR[16], digits=2), "; ", tab$CI[16], sep="")) +
+  annotate("text", x=4, y=1.57, label=paste(round(tab$OR_RR[17], digits=2), "; ", tab$CI[17], sep="")) +
+  annotate("text", x=3, y=1.57, label=paste(round(tab$OR_RR[18], digits=2), "; ", tab$CI[18], sep="")) +
+  annotate("text", x=2, y=1.57, label=paste(round(tab$OR_RR[19], digits=2), "; ", tab$CI[19], sep="")) +
+  annotate("text", x=1, y=1.57, label=paste(round(tab$OR_RR[20], digits=2), "; ", tab$CI[20], sep="")) +
+  scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
+
+
+
+
+grid.newpage()
+pushViewport(viewport(layout = 
+                        grid.layout(nrow = 2, ncol = 1, 
+                                    heights = unit(c(0.5, 1), "null"))))
+
+print(OR_plot, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+print(RR_plot, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+
+
+ppe <- read.csv("/home/lex/Desktop/handyaudit-data/PPE_CSV.csv")
+clinic_key <- read.csv("/home/lex/Desktop/clinic-names-matched.csv")
+demog <- read.csv("/home/lex/Desktop/ResPECT-final-datasets/ResPECT-demographics.csv")
+
+library(dplyr)
+colnames(ppe)
+
+#ObservationID year 1: 53346:85856, year2: 129563:169191, 
+#year 3: 224450:270152, year 4: 352407:388423
+
+year1 <- ifelse(as.integer(ppe$ObservationID)>=53346 & 
+         as.integer(ppe$ObservationID)<=85856, 1, 0)
+
+year2 <- ifelse(as.integer(ppe$ObservationID)>=129563 & 
+                  as.integer(ppe$ObservationID)<=169191, 2, 0)
+
+year3 <- ifelse(as.integer(ppe$ObservationID)>=224450 & 
+                  as.integer(ppe$ObservationID)<=270152, 3, 0)
+
+year4 <- ifelse(as.integer(ppe$ObservationID)>=352407 & 
+                  as.integer(ppe$ObservationID)<=388423, 4, 0)
+
+ppe$year <- year1+year2+year3+year4
+
+
+colnames(clinic_key) <- c("clinic", "Location")
+
+ha <- left_join(demog, clinic_key)
+
+key <- unique(select(ha, clinic, Location, year, ARM))
+
+ppe2 <- left_join(ppe, key)
+
+colnames(ha)
+
+colnames(ppe2)
+
+ppe2 <- filter(ppe2, Respiratory.Illness=="true")
+
+ppe2$complied <- 0
+
+ppe2$complied[ppe2$N95.3M.1860=="true" | 
+               ppe2$N95.3M.1870=="true" |
+               ppe2$N95.KC.PFR95.170.174..duckbill.=="true" | 
+               ppe2$Precept.15320..medical.mask..ties.=="true" |
+               ppe2$KC.47107..medical.mask..loops..=="true" ] <- 1
+
+ppe3 <- ppe2 %>% filter(N.R.B=='Participant' & !is.na(ARM)) 
+
+
+
+
+#chisq.test(tab1)
+
+#tab1
+
+#692/(752+692)*100
+
+totparti <- ppe3 %>% group_by(ARM) %>% 
+  summarise(total=length(complied))
+
+parti <- ppe3 %>% group_by(ARM, complied) %>% 
+  summarise(n=length(complied)) 
+
+parti <- left_join(parti, totparti)# %>% mutate(rate=n/total) #%>% filter(complied==1)
+
+compl <- t(matrix(parti$n, ncol = 2))
+
+dimnames(compl) <- list(ARM=c("MM", "N95"),
+                        complied=c("no", "yes"))
+
+chisq.test(compl)
+
+
+#wilcox.test(parti$rate[1:4], parti$rate[5:8])
+
+
+parti
+nonparti <- filter(parti, N.R.B=="Non-Participant")
+
+totarm <- ppe2 %>% filter(N.R.B=="Participant") %>%
+  group_by(ARM, year) %>% 
+  summarise(total=length(complied)) %>% 
+  filter(ARM=="N95" | ARM=="MM" ) 
+
+arm <- ppe2 %>% filter(N.R.B=="Participant") %>% 
+  group_by(ARM, complied, year) %>% 
+  summarise(n=length(complied)) %>% 
+  filter(ARM=="MM" | ARM=="N95" )
+
+armi <- left_join(arm, totarm) %>% mutate(rate=n/total) %>% filter(complied==1)
+armi
+
+wilcox.test(armi$rate[1:4], armi$rate[5:8])
+
+#ppe2 <- filter(ppe, N.R.B=="Participant")
+
+#ppe2 <- unique(ppe2$Location)
+
+write.csv(ppe2, "/home/lex/Desktop/ppe_handyaudit.csv")
+
+#substr(ppe$Datetime, 1, 4)
+
+#tail(ppe$Datetime)
+
+parti
+armi

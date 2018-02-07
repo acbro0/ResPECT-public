@@ -413,7 +413,7 @@ med.perc.diff.performance <- ggplot(med.stats, group=parameter2) +
    #                      limits=c(min(med.stats$threshold), (max(med.stats$threshold))), 
     #                     low = "green", mid = "purple", high = "purple", 
      #                    midpoint = max(med.stats$threshold)-1.5, na.value='grey') +
-  geom_smooth(aes(x=value, y=median.pct.diff), colour="black") +
+  geom_smooth(aes(x=value, y=test.median.pct.cases.captured), colour="black") +
   facet_wrap(~parameter2, ncol=2, scales = "free_x", labeller = label_parsed)+
   theme_classic() +
   geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
@@ -437,18 +437,18 @@ med.lowweeks.diff.performance <- ggplot(med.stats, group=parameter2) +
 
 med.lowweeks.diff.performance
 
-peaks.pct.diff.performance <- ggplot(med.stats, group=parameter2) +
+peaks.pct.diff.performance <- ggplot(alertstats, group=parameter) +
   # geom_point(aes(x=value, y=median.low.weeks.diff, color=threshold)) +
   #scale_colour_gradient2(guide=guide_colorbar(direction="vertical"),
   #                      limits=c(min(med.stats$threshold), (max(med.stats$threshold))), 
   #                     low = "green", mid = "purple", high = "purple", 
   #                    midpoint = max(med.stats$threshold)-1.5, na.value='grey') +
-  geom_smooth(aes(x=value, y=peaks.pct.diff), colour="black") +
-  facet_wrap(~parameter2, ncol=2, scales = "free_x", labeller = label_parsed)+
+  geom_smooth(aes(x=value, y=test.pct.peaks.captured), colour="black") +
+  facet_wrap(~parameter, ncol=2, scales = "free_x", labeller = label_parsed)+
   theme_classic() +
-  geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
+#  geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
   xlab("parameter value")+
-  ylab("median percent peaks captured difference")
+  ylab("median percent peaks captured")
 
 peaks.pct.diff.performance
 

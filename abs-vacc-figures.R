@@ -412,3 +412,18 @@ ggplot(vac, aes(x = predictors, y = post.mean)) +
   theme(axis.text = element_text(size=12),  axis.title=element_text(size=14,face="bold"))   
 #```
 
+### look at outliers
+
+load("/home/lex/Desktop/abs-vacc-dataset.rda")
+
+absvax1 <- filter(absvax, abs_days>0)
+
+ggplot(data=absvax1, aes(x = absvax1$abs_days)) +
+  #ggtitle("Absent days frequency") +
+  theme_bw() + 
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = round(seq(min(absvax1$abs_days), 
+                                        max(absvax1$abs_days), by = 4),1)) +
+  labs(y = "Number of ResPECT participants*", x = "Reported days absent") +
+  annotate("text", x = 9, y = -10, label = "*only participants reporting a sick day are shown", size=3.5) 
+

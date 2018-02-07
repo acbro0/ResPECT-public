@@ -169,7 +169,8 @@ special_applyALERT <- function (data, threshold, k = 0, lag = 7, minWeeks = 8, t
   out <- rep(NA, length(cnames))
   names(out) <- cnames
   out["tot.cases"] <- sum(data[, caseColumn])
-  out["duration"] <- idxEndDate - idxStartDate + 1
+  #out["duration"] <- idxEndDate - idxStartDate + 1
+  out["duration"] <- sum(onALERT)   #TRY this instead
   out["ALERT.cases"] <- sum(data[, caseColumn] * onALERT)
   out["ALERT.cases.pct"] <- out["ALERT.cases"]/out["tot.cases"]
   out["peak.captured"] <- idxPeak >= idxStartDate & idxPeak <= 

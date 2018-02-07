@@ -18,23 +18,55 @@ dates$endDate <- ymd(dates$endDate)
 #truncate to get years we have cutoffs for and cutoffs we have years for.
 chco <- filter(chco, Date >= head(dates$startDate, 1)-weeks(2))
 dates <- filter(dates, endDate <= tail(chco$Date, 1)+weeks(6))
-alertholder <- createALERT(chco, firstMonth=8, lag=0)
 
-thres3 <- thresholdtestALERT(chco, firstMonth = 8, whichThreshold = 3)[[2]]
-ALERT_dates <- data.frame(thres3[[1]])
+
+chco_train <- chco[1:210,]
+chco_test <- chco[211:nrow(chco),]
+
+train_dates <- dates[1:4,]
+
+median(difftime(train_dates$startDate, train_dates$endDate))  # median of 18 weeks long in the real data
+128.5/7
+
+
+alertholder <- createALERT(chco_train, firstMonth=7, lag=0, allThresholds = T) #createALERT maybe not calculating median duration corectly?
+#I slacked Steve about it.
+
+threstest <- thresholdtestALERT(chco_train, firstMonth = 7, whichThreshold = 3)
+
+ALERT_dates <- data.frame(threstest$details)
 ##convert dates to something human readable for plotting
 ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
 ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+
+median(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+105/7
+
+##choose a threshold of 3 to get 13 weeks.
+
+
+
+thres2 <- thresholdtestALERT(chco, firstMonth = 7, whichThreshold = 2)[[2]]
+
+ALERT_dates <- data.frame(thres2)
+##convert dates to something human readable for plotting
+ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
+ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+
+median(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+94.7/7
+
+
 ALERT_dates <- ALERT_dates[,8:9]
 colnames(ALERT_dates) <- c("xstart", "xstop")
 
 library(gridExtra)
 
-grid.arrange(real_compare_figs(ALERT_dates, chco, "ALERT, threshold=3"),
+grid.arrange(real_compare_figs(ALERT_dates, chco, "ALERT, threshold=2"),
              real_compare_figs(dates, chco, "actual dates"))
 
 
-
+createALERT(chco_test)
 
 
 

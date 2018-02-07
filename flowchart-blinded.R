@@ -46,3 +46,58 @@ for ( i in 1:6) textrect (elpos[i,], radx=0.2, rady=0.06, lab=labels[i], shadow.
 
 
 
+## example of autogenerating a consort diagram in R
+nodetext <- structure(
+  c('Approached', '', 'Ineligible', '',
+    'Enrolled', '', '', '',
+    'Control', 'Weightloss', 'Smoking', 'Smoking + WL',
+    'Person Month FU', 'Person Month FU', 'Person Month FU', 'Person Month FU'),
+  dim=c(4, 4))
+nodelab <- structure(letters[seq(nodetext)], dim=c(4,4))
+cbind(c(nodetext),c(nodelab))
+nodelink <- '
+\\path (a)--(c);
+\\path (a)--(e);
+\\path (e)-|(i);
+\\path (e)-|(j);
+\\path (e)-|(k);
+\\path (e)-|(l);
+\\path (i)--(m);
+\\path (j)--(n);
+\\path (k)--(o);
+\\path (l)--(p);
+'
+consort <- function(nodetext, nodelab=NULL, nodelink=NULL, outfile) {
+  nodetext <- t(nodetext)
+  nodelab <- t(nodelab)
+  
+  opts <- "\\tikzset{
+  block/.style={rectangle, draw, fill=blue!20, 
+  text width=0.85in, text centered, rounded corners, minimum height=4em},
+  line/.style ={draw, thick, -latex', shorten >=0pt}
+     }"
+  start <- '\\begin{tikzpicture}[node distance = .15in, auto]'
+  end <- '\\end{tikzpicture}'
+  
+  if (is.null(nodelab)) {
+    nodelab <- letters[seq(nodetext)]
+  }
+  nodes <- paste0('\\node ', ifelse(nodetext=='', '[draw=none] ', '[block]'), '(', nodelab, ') {', nodetext, '};')
+  nodes <- structure(nodes, dim=dim(nodetext))
+  nodes <- paste(apply(nodes, 1, paste, collapse=' & '), '\\\\')
+  matrix <- nodes
+  
+  startmatrix <- '\\matrix [column sep=0.85in, row sep=0.85in] {'
+  endmatrix <- '};'
+
+  path <- nodelink
+  startpath <- '\\begin{scope}[on background layer, every path/.style=line]'
+  endpath <- '\\end{scope}'
+  
+  graphic <- c(start, opts, startmatrix, matrix, endmatrix, startpath, path, endpath, end)
+  
+  write(graphic, file=)
+}
+##consort(nodetext, nodelab=nodelab, nodelink=nodelink, outfile='Output/consort.tex')
+
+
