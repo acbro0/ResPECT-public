@@ -191,6 +191,61 @@ special_applyALERT <- function (data, threshold, k = 0, lag = 7, minWeeks = 8, t
 }
 
 
+############################################################################
+######## use user-entered start and end dates with applyALERT   ############
+############################################################################
+
+datebased_applyALERT <- function (data, CHCOstartdate, CHCOenddate, k = 0, lag = 7, minWeeks = 8, target.pct = NULL, 
+                                plot = FALSE, dateColumn = "Date", caseColumn="Cases") 
+{ 
+  idxStartDate <- which(abs(data[, dateColumn]-ymd(CHCOstartdate)) == min(abs(data[, dateColumn]-ymd(CHCOstartdate))))
+  startDate <- data[idxStartDate, "Date"]
+  minEndIdx <- idxStartDate + minWeeks - 1
+  idxEndDate <- which(abs(data[, dateColumn]-ymd(CHCOenddate)) == min(abs(data[, dateColumn]-ymd(CHCOenddate))))
+  endDate <- data[idxEndDate, "Date"]
+  onALERT <- rep(0, nrow(data))
+  if (is.na(idxEndDate)) {
+    cnames <- c("tot.cases", "duration", "ALERT.cases", "ALERT.cases.pct", 
+                "peak.captured", "peak.ext.captured", "low.weeks.incl", "start", "end",
+                "duration.diff")
+    out <- rep(NA, length(cnames))
+    names(out) <- cnames
+    out["tot.cases"] <- sum(data[, caseColumn])
+    return(out)
+  }
+  onALERT[idxStartDate:idxEndDate] <- 1
+  idxPeak <- min(which(data[, caseColumn] == max(data[, caseColumn], 
+                                                 na.rm = TRUE)))
+  if (!is.null(target.pct)) {
+    postcast <- postcastALERT(data, target.pct, caseColumn = caseColumn)
+  }
+  cnames <- c("tot.cases", "duration", "ALERT.cases", "ALERT.cases.pct", 
+              "peak.captured", "peak.ext.captured", "low.weeks.incl", 
+              "start", "end")
+  out <- rep(NA, length(cnames))
+  names(out) <- cnames
+  out["tot.cases"] <- sum(data[, caseColumn])
+  #out["duration"] <- idxEndDate - idxStartDate + 1
+  out["duration"] <- sum(onALERT)   #TRY this instead
+  out["ALERT.cases"] <- sum(data[, caseColumn] * onALERT)
+  out["ALERT.cases.pct"] <- out["ALERT.cases"]/out["tot.cases"]
+  out["peak.captured"] <- idxPeak >= idxStartDate & idxPeak <= 
+    idxEndDate
+  out["peak.ext.captured"] <- idxPeak >= (idxStartDate + k) & 
+    idxPeak <= (idxEndDate - k)
+  out["low.weeks.incl"] <- sum(data[idxStartDate:idxEndDate, 
+                                    caseColumn] ==0)
+  out["start"] <- startDate
+  out["end"] <- endDate
+  if (!is.null(target.pct)) 
+    out <- c(out, duration.diff = unname(out["duration"] - 
+                                           postcast["duration"]))
+  else out <- c(out, duration.diff = NA)
+  if (plot) 
+    message("Plot option not implemented.")
+  return(out)
+}
+
 
 ## make a nice figure of selected simulations
 sim_compare_figs <- function(start_and_end, selected_sims, index, sims_metadata) {

@@ -8,17 +8,17 @@ library(gridExtra)
 
 #real data
 ##load the data
-fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("~/Desktop/Applied-ALERT/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
 fluA$Date <- ymd(fluA$Date)
 fluA <- arrange(fluA, Date)
 
-fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+fluB <- read.csv("~/Desktop/Applied-ALERT/applied-ALERT-data/CHCO-fluB.csv", 
                  stringsAsFactors=F)
 fluB$Date <- ymd(fluB$Date)
 fluB <- arrange(fluB, Date)
 
-RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+RSV <- read.csv("~/Desktop/Applied-ALERT/applied-ALERT-data/CHCO-RSV.csv", 
                  stringsAsFactors=F)
 RSV$Date <- ymd(RSV$Date)
 RSV <- arrange(RSV, Date)
