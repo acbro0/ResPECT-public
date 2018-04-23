@@ -1,6 +1,6 @@
-models <- readRDS("/home/lex/Desktop/ARMS-final-results.rds")
+models <- readRDS("/home/alexandria/Desktop/ARMS-final-results.rds")
 
-nums <- readRDS("/home/lex/Desktop/outcomes-final-numbers.rds")
+nums <- readRDS("/home/alexandria/Desktop/outcomes-final-numbers.rds")
 
 library("mice")
 library("dplyr")
@@ -82,14 +82,14 @@ RR_plot <- ggplot(RR, aes(x=model_name, y = OR_RR)) +
   theme(axis.text = element_text(size=10),  axis.title=element_text(size=12,face="bold")) +
   #ggtitle("Relative Risk for N95 vs. MM (reference)")+
   theme(panel.grid.minor=element_blank()) +
-  annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_itt), sep=""))+
-  annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_pp), sep="")) +
-  annotate("text", x=5.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_itt), sep=""))+
-  annotate("text", x=7.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_pp), sep="")) +
-  annotate("text", x=9.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_itt), sep=""))+
-  annotate("text", x=11.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_pp), sep="")) +
-  annotate("text", x=13.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_itt), sep=""))+
-  annotate("text", x=15.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_pp), sep="")) +
+  annotate("text", x=1.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_pp), sep=""))+
+  annotate("text", x=3.5, y=0.651, label=paste("n=", as.numeric(nums$n_ILI_itt), sep="")) +
+  annotate("text", x=5.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_pp), sep=""))+
+  annotate("text", x=7.5, y=0.651, label=paste("n=", as.numeric(nums$n_LCRI_itt), sep="")) +
+  annotate("text", x=9.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_pp), sep=""))+
+  annotate("text", x=11.5, y=0.651, label=paste("n=", as.numeric(nums$n_LDI_itt), sep="")) +
+  annotate("text", x=13.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_pp), sep=""))+
+  annotate("text", x=15.5, y=0.651, label=paste("n=", as.numeric(nums$n_ARI_itt), sep="")) +
   scale_y_log10(limits= c(0.63, 1.6), breaks=c(0.6, 0.8, 1.0, 1.2, 1.4, 1.6))
 
 library("grid")
@@ -110,11 +110,11 @@ resultstable
 
 names(nums)
 
-n <- c(as.numeric(nums$n_FLU_itt[3]), as.numeric(nums$n_FLU_pp[3]), 
-  as.numeric(nums$n_ILI_itt), as.numeric(nums$n_ILI_pp), 
-  as.numeric(nums$n_ARI_itt), as.numeric(nums$n_ARI_pp),
-  as.numeric(nums$n_LCRI_itt), as.numeric(nums$n_LCRI_pp),
-  as.numeric(nums$n_LDI_itt), as.numeric(nums$n_LDI_pp))
+n <- c(as.numeric(nums$n_FLU_itt[3]), as.numeric(nums$n_FLU_pp[3]),
+       as.numeric(nums$n_ILI_itt), as.numeric(nums$n_ILI_pp),
+       as.numeric(nums$n_ARI_itt), as.numeric(nums$n_ARI_pp),
+       as.numeric(nums$n_LCRI_itt), as.numeric(nums$n_LCRI_pp),
+       as.numeric(nums$n_LDI_itt), as.numeric(nums$n_LDI_pp))
 
 n <- as.character(rep(n, each=2))
 
@@ -128,7 +128,30 @@ resultstable$CI <- paste("[", format(round(resultstable$CI_lower, 3), nsmall=3),
 
 tab <- select(resultstable, model_name2, n, OR_RR, CI)
 
-
+tab <- rbind(tab[1:4,], tab[9:12,], tab[17:20,], tab[13:16,], tab[5:8,])
 
 print(xtable(tab, type="html", digits=3))
 tab
+
+#Compliance data
+
+ppe <- read.csv("/home/alexandria/Desktop/handyaudit-data/PPE_CSV.csv")
+
+head(ppe)
+
+ppe2 <- ppe %>% filter(N.R.B=="Participant" & Respiratory.Illness=="true")
+
+ppe2 <- ppe2[9:13]
+
+q <- ifelse(ppe2[1]=="true", 1, 0)
+
+for (i in 2:length(ppe2)){
+  o  <- ifelse(ppe2[i]=="true", 1, 0)
+  q <- o+q
+}
+
+q
+
+sum(q)/length(q)*100
+
+nrow(ppe2)
