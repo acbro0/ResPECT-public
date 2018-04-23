@@ -8,8 +8,10 @@ require(dplyr)
 
 #real data
 ##load the data
-chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
-                 stringsAsFactors=F)
+#chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+#                 stringsAsFactors=F)
+
+##FLU A ONLY
 chco$Date <- ymd(chco$Date)
 chco <- arrange(chco, Date)
 dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
@@ -39,8 +41,8 @@ ALERT_dates <- data.frame(threstest$details)
 ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
 ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
 
-median(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
-105/7
+mean(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+91.5/7
 
 ##choose a threshold of 3 to get 13 weeks.
 
@@ -171,7 +173,8 @@ holder <- chco %>% group_by(year) %>% summarise(Cases=min(Cases)) %>%
 holder <- left_join(holder, chco)
 
 #number of 0 weeks included
-holder <- filter(holder, alertperiod==TRUE) %>% group_by(year) %>% summarise(low_weeks_incl=length(alertperiod))
+holder <- filter(holder, alertperiod==TRUE) %>% group_by(year) %>% 
+  summarise(low_weeks_incl=length(alertperiod))
 
 calc <- left_join(calc, holder) %>% data.frame()
 
@@ -208,6 +211,22 @@ require(xtable)
 print(xtable(comparison[1:7]), include.rownames=F)
 
 str(stats_real)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #plotting
 #choose a threshold
@@ -287,6 +306,27 @@ threstrig <- ggplot() + #this is the ALERT dates
 require(gridExtra)
 
 grid.arrange(datetrig,threstrig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ######################################
 ##### MODEL FORMULATION ##############
@@ -482,6 +522,24 @@ grid.arrange(
     geom_bar(stat="identity") +
     theme_classic()
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###get the other diseases
 

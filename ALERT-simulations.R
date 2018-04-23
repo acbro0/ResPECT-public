@@ -538,6 +538,20 @@ summary.stats <- alertstats %>% group_by(parameter) %>% summarize(
 rownames(summary.stats) <- summary.stats$parameter
 summary.stats$parameter <- NULL
 
+summary.stats.overall <- alertstats %>% summarize(
+  min(median.dur, na.rm=T),
+  max(median.dur, na.rm=T),
+  median(median.dur), 
+  min(test.median.dur, na.rm=T),
+  max(test.median.dur, na.rm=T),
+  median(test.median.dur), 
+  min(as.numeric(median.pct.cases.captured), na.rm=T),
+  max(as.numeric(median.pct.cases.captured), na.rm=T),
+  median(as.numeric(median.pct.cases.captured)), 
+  min(test.median.pct.cases.captured, na.rm=T),
+  max(test.median.pct.cases.captured, na.rm=T),
+  median(test.median.pct.cases.captured)) %>% data.frame
+
 
 summary_holder1 <- list()
 summary_holder2 <- list()
@@ -567,6 +581,20 @@ print(xtable(tab), include.rownames=T)
 ##compare low weeks captured between training and testing datasets
 
 lowweek.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
+  min(as.numeric(mean.low.weeks.incl), na.rm=T),
+  max(as.numeric(mean.low.weeks.incl), na.rm=T),
+  median(as.numeric(mean.low.weeks.incl), na.rm=T),
+  min(test.mean.low.weeks.incl, na.rm=T),
+  max(test.mean.low.weeks.incl, na.rm=T),
+  median(test.mean.low.weeks.incl, na.rm=T),
+  min(pct.peaks.captured, na.rm=T), 
+  max(pct.peaks.captured, na.rm=T), 
+  median(pct.peaks.captured, na.rm=T), 
+  min(test.pct.peaks.captured, na.rm=T),
+  max(test.pct.peaks.captured, na.rm=T),
+  median(test.pct.peaks.captured, na.rm=T)) %>% data.frame
+
+lowweek.perform.stats.overall <- alertstats %>% summarize(
   min(as.numeric(mean.low.weeks.incl), na.rm=T),
   max(as.numeric(mean.low.weeks.incl), na.rm=T),
   median(as.numeric(mean.low.weeks.incl), na.rm=T),

@@ -340,3 +340,100 @@ write.csv(ppe2, "/home/lex/Desktop/ppe_handyaudit.csv")
 
 parti
 armi
+
+
+########################################
+#### SENSITIVITY ANALYSIS  #############
+########################################
+
+sens <- readRDS("~/Desktop/sensitivity-grid.rds")
+
+library(mice)
+summary(sens[[1]][[1]])
+
+holder <- list()
+metaholder1 <- list()
+
+for(j in 1:11){
+for(i in 1:11){
+holder[[i]] <- summary(sens[[j]][[i]])[[2,1]]
+}
+metaholder1[[j]] <- unlist(holder)
+}
+
+library(reshape2)
+library(ggplot2)
+
+sens[[12]] #N95
+sens[[13]] #MM
+
+holder1 <- data.frame(cbind(rep(sens[[13]], 11),
+                rep(sens[[12]], each = 11),
+                unlist(metaholder1)))
+
+
+
+ggplot(data = holder1, aes(x=holder1[,1], y=holder1[,2], fill=exp(holder1[,3]))) + 
+  theme_bw() + 
+  labs(y = "N95", x = "MM") +    
+  geom_tile() +
+  scale_fill_gradient2(low = "white",
+                       mid="white",
+                       high = "blue",
+                       midpoint = 1,
+                       space = "Lab", 
+                       name="Odds Ratio")
+
+head(holder)
+
+holder <- list()
+metaholder2 <- list()
+
+##is it significant?
+
+for(j in 1:11){
+  for(i in 1:11){
+    holder[[i]] <- summary(sens[[j]][[i]])[[2,5]]
+  }
+  metaholder2[[j]] <- unlist(holder)
+}
+
+holder2 <- data.frame(cbind(rep(sens[[13]], 11),
+                           rep(sens[[12]], each = 11),
+                           unlist(metaholder2)))
+
+head(holder1)
+head(holder2)
+
+holder1$pval <- holder2$X3
+
+holder <- holder1
+
+holder$X4 <- p.adjust(holder$pval, method = "holm")
+
+holder$sig <- as.factor(ifelse(holder$X4<0.05, "*", NA))
+
+###plot it
+
+ggplot(data = holder, aes(x=holder[,1], y=holder[,2], shape=holder$sig)) + 
+  theme_bw() + 
+  labs(y = "N95", x = "MM") +    
+  scale_shape_identity() +
+  geom_point(size=5)
+
+
+ggplot(data = holder1, aes(x=holder[,1], y=holder[,2], shape=holder$sig, fill=exp(holder$X3))) + 
+  theme_bw() + 
+  labs(y = "assumed N95 influenza attack rate", 
+       x = "assumed MM influenza attack rate") +    
+  geom_tile() +
+  scale_fill_gradient2(low = "white",
+                       mid="white",
+                       high = "blue",
+                       midpoint = 1,
+                       space = "Lab", 
+                       name="Odds Ratio") +
+  scale_shape_identity() +
+  geom_point(size=8)
+
+
