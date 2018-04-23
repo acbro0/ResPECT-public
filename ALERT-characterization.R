@@ -8,8 +8,10 @@ require(dplyr)
 
 #real data
 ##load the data
-chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
-                 stringsAsFactors=F)
+#chco <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+#                 stringsAsFactors=F)
+
+##FLU A ONLY
 chco$Date <- ymd(chco$Date)
 chco <- arrange(chco, Date)
 dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
@@ -18,23 +20,55 @@ dates$endDate <- ymd(dates$endDate)
 #truncate to get years we have cutoffs for and cutoffs we have years for.
 chco <- filter(chco, Date >= head(dates$startDate, 1)-weeks(2))
 dates <- filter(dates, endDate <= tail(chco$Date, 1)+weeks(6))
-alertholder <- createALERT(chco, firstMonth=8, lag=0)
 
-thres3 <- thresholdtestALERT(chco, firstMonth = 8, whichThreshold = 3)[[2]]
-ALERT_dates <- data.frame(thres3[[1]])
+
+chco_train <- chco[1:210,]
+chco_test <- chco[211:nrow(chco),]
+
+train_dates <- dates[1:4,]
+
+median(difftime(train_dates$startDate, train_dates$endDate))  # median of 18 weeks long in the real data
+128.5/7
+
+
+alertholder <- createALERT(chco_train, firstMonth=7, lag=0, allThresholds = T) #createALERT maybe not calculating median duration corectly?
+#I slacked Steve about it.
+
+threstest <- thresholdtestALERT(chco_train, firstMonth = 7, whichThreshold = 3)
+
+ALERT_dates <- data.frame(threstest$details)
 ##convert dates to something human readable for plotting
 ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
 ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+
+mean(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+91.5/7
+
+##choose a threshold of 3 to get 13 weeks.
+
+
+
+thres2 <- thresholdtestALERT(chco, firstMonth = 7, whichThreshold = 2)[[2]]
+
+ALERT_dates <- data.frame(thres2)
+##convert dates to something human readable for plotting
+ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
+ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
+
+median(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+94.7/7
+
+
 ALERT_dates <- ALERT_dates[,8:9]
 colnames(ALERT_dates) <- c("xstart", "xstop")
 
 library(gridExtra)
 
-grid.arrange(real_compare_figs(ALERT_dates, chco, "ALERT, threshold=3"),
+grid.arrange(real_compare_figs(ALERT_dates, chco, "ALERT, threshold=2"),
              real_compare_figs(dates, chco, "actual dates"))
 
 
-
+createALERT(chco_test)
 
 
 
@@ -139,7 +173,8 @@ holder <- chco %>% group_by(year) %>% summarise(Cases=min(Cases)) %>%
 holder <- left_join(holder, chco)
 
 #number of 0 weeks included
-holder <- filter(holder, alertperiod==TRUE) %>% group_by(year) %>% summarise(low_weeks_incl=length(alertperiod))
+holder <- filter(holder, alertperiod==TRUE) %>% group_by(year) %>% 
+  summarise(low_weeks_incl=length(alertperiod))
 
 calc <- left_join(calc, holder) %>% data.frame()
 
@@ -176,6 +211,22 @@ require(xtable)
 print(xtable(comparison[1:7]), include.rownames=F)
 
 str(stats_real)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #plotting
 #choose a threshold
@@ -255,6 +306,27 @@ threstrig <- ggplot() + #this is the ALERT dates
 require(gridExtra)
 
 grid.arrange(datetrig,threstrig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ######################################
 ##### MODEL FORMULATION ##############
@@ -450,6 +522,24 @@ grid.arrange(
     geom_bar(stat="identity") +
     theme_classic()
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###get the other diseases
 

@@ -413,7 +413,7 @@ med.perc.diff.performance <- ggplot(med.stats, group=parameter2) +
    #                      limits=c(min(med.stats$threshold), (max(med.stats$threshold))), 
     #                     low = "green", mid = "purple", high = "purple", 
      #                    midpoint = max(med.stats$threshold)-1.5, na.value='grey') +
-  geom_smooth(aes(x=value, y=median.pct.diff), colour="black") +
+  geom_smooth(aes(x=value, y=test.median.pct.cases.captured), colour="black") +
   facet_wrap(~parameter2, ncol=2, scales = "free_x", labeller = label_parsed)+
   theme_classic() +
   geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
@@ -437,18 +437,18 @@ med.lowweeks.diff.performance <- ggplot(med.stats, group=parameter2) +
 
 med.lowweeks.diff.performance
 
-peaks.pct.diff.performance <- ggplot(med.stats, group=parameter2) +
+peaks.pct.diff.performance <- ggplot(alertstats, group=parameter) +
   # geom_point(aes(x=value, y=median.low.weeks.diff, color=threshold)) +
   #scale_colour_gradient2(guide=guide_colorbar(direction="vertical"),
   #                      limits=c(min(med.stats$threshold), (max(med.stats$threshold))), 
   #                     low = "green", mid = "purple", high = "purple", 
   #                    midpoint = max(med.stats$threshold)-1.5, na.value='grey') +
-  geom_smooth(aes(x=value, y=peaks.pct.diff), colour="black") +
-  facet_wrap(~parameter2, ncol=2, scales = "free_x", labeller = label_parsed)+
+  geom_smooth(aes(x=value, y=test.pct.peaks.captured), colour="black") +
+  facet_wrap(~parameter, ncol=2, scales = "free_x", labeller = label_parsed)+
   theme_classic() +
-  geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
+#  geom_hline(aes(yintercept=0), linetype="longdash", show.legend=FALSE, alpha=0.35) +
   xlab("parameter value")+
-  ylab("median percent peaks captured difference")
+  ylab("median percent peaks captured")
 
 peaks.pct.diff.performance
 
@@ -538,6 +538,20 @@ summary.stats <- alertstats %>% group_by(parameter) %>% summarize(
 rownames(summary.stats) <- summary.stats$parameter
 summary.stats$parameter <- NULL
 
+summary.stats.overall <- alertstats %>% summarize(
+  min(median.dur, na.rm=T),
+  max(median.dur, na.rm=T),
+  median(median.dur), 
+  min(test.median.dur, na.rm=T),
+  max(test.median.dur, na.rm=T),
+  median(test.median.dur), 
+  min(as.numeric(median.pct.cases.captured), na.rm=T),
+  max(as.numeric(median.pct.cases.captured), na.rm=T),
+  median(as.numeric(median.pct.cases.captured)), 
+  min(test.median.pct.cases.captured, na.rm=T),
+  max(test.median.pct.cases.captured, na.rm=T),
+  median(test.median.pct.cases.captured)) %>% data.frame
+
 
 summary_holder1 <- list()
 summary_holder2 <- list()
@@ -567,6 +581,20 @@ print(xtable(tab), include.rownames=T)
 ##compare low weeks captured between training and testing datasets
 
 lowweek.perform.stats <- alertstats %>% group_by(parameter) %>% summarize(
+  min(as.numeric(mean.low.weeks.incl), na.rm=T),
+  max(as.numeric(mean.low.weeks.incl), na.rm=T),
+  median(as.numeric(mean.low.weeks.incl), na.rm=T),
+  min(test.mean.low.weeks.incl, na.rm=T),
+  max(test.mean.low.weeks.incl, na.rm=T),
+  median(test.mean.low.weeks.incl, na.rm=T),
+  min(pct.peaks.captured, na.rm=T), 
+  max(pct.peaks.captured, na.rm=T), 
+  median(pct.peaks.captured, na.rm=T), 
+  min(test.pct.peaks.captured, na.rm=T),
+  max(test.pct.peaks.captured, na.rm=T),
+  median(test.pct.peaks.captured, na.rm=T)) %>% data.frame
+
+lowweek.perform.stats.overall <- alertstats %>% summarize(
   min(as.numeric(mean.low.weeks.incl), na.rm=T),
   max(as.numeric(mean.low.weeks.incl), na.rm=T),
   median(as.numeric(mean.low.weeks.incl), na.rm=T),
