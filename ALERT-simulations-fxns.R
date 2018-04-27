@@ -100,6 +100,67 @@ thresholdtestALERT <- function(data, firstMonth=firstMonth, lag=7, minWeeks=8, w
   return(list(out=out, details=details))
 }
 
+
+### apply datebased_applyALERT across a dataset to get stats based on user-supplied dates.
+
+datetestALERT <- function(data, CHCOstartdate, CHCOenddate, 
+                          firstMonth=8, k = 0, lag = 7, 
+                          minWeeks = 8, target.pct = NULL, 
+                          plot = FALSE, dateColumn = "Date", caseColumn="Cases") {
+  ## check for correct column headers
+  if( !("Date" %in% colnames(data)))
+    stop("data needs Date columns.")
+  if( !(caseColumn %in% colnames(data)) )
+    stop(paste("column named", caseColumn, "not found in data."))
+  ## create a list where each element of the list contains the indices for rows from that season. 
+  years <- unique(year(data$Date))
+  idxs <- vector("list", length(years)-1) 
+  for(i in 1:length(idxs)) {
+    startDate2 <- as.Date(paste0(years[i], "-", firstMonth, "-01"))
+    endDate2 <- as.Date(paste0(years[i]+1, "-", firstMonth, "-01"))
+    idxs[[i]] <- which(data$Date >= startDate2 & data$Date < endDate2)   
+  }
+  ##  calculate metrics
+  cnames <- c("median.dur",
+              "median.pct.cases.captured",
+              "min.pct.cases.captured",
+              "max.pct.cases.captured",
+              "pct.peaks.captured",
+              "pct.ext.peaks.captured",
+              "mean.low.weeks.incl")
+  if(!is.null(target.pct)) cnames <- c(cnames, "mean.duration.diff")
+  out <- matrix(NA, nrow=1, ncol=length(cnames))
+  colnames(out) <- cnames
+  ## run a sample to get dim and dimnames
+  samp.num <- ifelse(length(idxs[[1]])==0, 2, 1) # Used for evalALERT, if first season missing (i.e is test season) then use second season for sampleRun
+  sampleRun <- datebased_applyALERT(data[idxs[[samp.num]],], CHCOstartdate=CHCOstartdate[1], 
+                                    CHCOenddate = CHCOenddate[1], k=k, lag=lag, minWeeks=minWeeks, 
+                                    target.pct=target.pct, caseColumn=caseColumn,
+                                    dateColumn = dateColumn)
+    tmp <- matrix(NA, nrow=length(idxs), ncol=length(sampleRun))
+    colnames(tmp) <- names(sampleRun)
+      for(j in 1:length(idxs)){
+        if(length(idxs[[j]])==0) next # Used for evalALERT, skips missing (test) season
+        tmp[j,] <- datebased_applyALERT(data[idxs[[j]],], CHCOstartdate=CHCOstartdate[j], 
+                                        CHCOenddate = CHCOenddate[j], k=k, lag=lag, 
+                                        minWeeks=minWeeks, target.pct=target.pct, 
+                                        caseColumn=caseColumn, dateColumn = dateColumn)
+      }
+    details <- list()
+      details[[i]] <- tmp
+    out[1,"median.dur"] <- median(tmp[,"duration"], na.rm=TRUE) ## median duration
+    out[1,"median.pct.cases.captured"] <- round(100*median(tmp[,"ALERT.cases.pct"], na.rm=TRUE),1) ## median % of cases captured
+    out[1,"min.pct.cases.captured"] <- round(100*min(tmp[,"ALERT.cases.pct"], na.rm=TRUE),1) ## min % of cases captured
+    out[1,"max.pct.cases.captured"] <- round(100*max(tmp[,"ALERT.cases.pct"], na.rm=TRUE),1) ## max % of cases captured
+    out[1,"pct.peaks.captured"] <- round(100*sum(tmp[,"peak.captured"])/nrow(tmp),1) ## % of times peak captured
+    out[1,"pct.ext.peaks.captured"] <- round(100*sum(tmp[,"peak.ext.captured"])/nrow(tmp),1) ## % of times peak +/- k weeks captured
+    out[1,"mean.low.weeks.incl"] <- mean(tmp[,"low.weeks.incl"], na.rm=TRUE)
+    if(!is.null(target.pct)) out[1,"mean.duration.diff"] <- mean(tmp[,"duration.diff"], na.rm=TRUE)
+  return(list(out=out, details=details))
+}
+
+
+
 #########################################
 ########   special applyALERT   ############
 #########################################

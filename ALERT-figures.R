@@ -8,17 +8,17 @@ library(gridExtra)
 
 #real data
 ##load the data
-fluA <- read.csv("~/Desktop/Applied-ALERT/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
 fluA$Date <- ymd(fluA$Date)
 fluA <- arrange(fluA, Date)
 
-fluB <- read.csv("~/Desktop/Applied-ALERT/applied-ALERT-data/CHCO-fluB.csv", 
+fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
                  stringsAsFactors=F)
 fluB$Date <- ymd(fluB$Date)
 fluB <- arrange(fluB, Date)
 
-RSV <- read.csv("~/Desktop/Applied-ALERT/applied-ALERT-data/CHCO-RSV.csv", 
+RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
                  stringsAsFactors=F)
 RSV$Date <- ymd(RSV$Date)
 RSV <- arrange(RSV, Date)
@@ -79,20 +79,23 @@ grid.arrange(rawdat, dens, ncol=2, left="LCRI incidence")
 ##Run ALERT
 
 alerttrain <- createALERT(data[1:193,], firstMonth=8, lag=0) #train on 2004-2008
+true <- datetestALERT(data[1:193,], dates[1:4,1], dates[1:4,2])
 
-test <- thresholdtestALERT(data, firstMonth = 8, whichThreshold = 3)
+trainstats <- full_join(data.frame(alerttrain[[1]]), data.frame(true[[1]]))
+
+test <- thresholdtestALERT(data, firstMonth = 8, whichThreshold = 6)
 ALERT_dates3 <- data.frame(test$details)
 ##convert dates to something human readable for plotting
 ALERT_dates3$start <- as.Date(ALERT_dates3$start, origin="1970-01-01")
 ALERT_dates3$end <- as.Date(ALERT_dates3$end, origin="1970-01-01")
 
-test <- thresholdtestALERT(data, firstMonth = 8, whichThreshold = 12)
+test <- thresholdtestALERT(data, firstMonth = 8, whichThreshold = 10)
 ALERT_dates12 <- data.frame(test$details)
 ##convert dates to something human readable for plotting
 ALERT_dates12$start <- as.Date(ALERT_dates12$start, origin="1970-01-01")
 ALERT_dates12$end <- as.Date(ALERT_dates12$end, origin="1970-01-01")
 
-test <- thresholdtestALERT(data, firstMonth = 8, whichThreshold = 22)
+test <- thresholdtestALERT(data, firstMonth = 8, whichThreshold = 21)
 ALERT_dates22 <- data.frame(test$details)
 ##convert dates to something human readable for plotting
 ALERT_dates22$start <- as.Date(ALERT_dates22$start, origin="1970-01-01")
@@ -104,37 +107,29 @@ ALERT_dates22$end <- as.Date(ALERT_dates22$end, origin="1970-01-01")
 alerttest <- createALERT(data[194:nrow(data),], firstMonth=8, 
                           lag=0, allThresholds = TRUE) 
 
-holder <- data.frame(alerttest[[1]]) %>% filter(threshold==3 | threshold==12 | threshold==22)
+holder <- data.frame(alerttest[[1]]) %>% 
+  filter(threshold==1 |
+           threshold==2 |
+           threshold==4 |
+           threshold==6 |
+           threshold==10 |
+           threshold==21)
 
 
+teststats <- full_join(holder, 
+          data.frame(datetestALERT(data[194:nrow(data),], 
+                                   dates[5:8,1], dates[5:8,2])[[1]]))
 
-
-########## LOOK AT THIS NOTE, YO
-
-##modify special_applyALERT to take dates and return metrics????
-
-
+comparestats <- full_join(trainstats, teststats)
 
 require(xtable)
 
-print(xtable(comparison[1:7]), include.rownames=F)
+print(xtable(comparestats), include.rownames=F)
 
-str(stats_real)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+datetestALERT(data, dates[,1], dates[,2])  ##full real data 
+data.frame(createALERT(data, firstMonth=8, 
+            lag=0, allThresholds = TRUE) [[1]]) %>%
+  filter(threshold==6 | threshold==10 | threshold==21)
 
 
 
@@ -144,10 +139,10 @@ ymin <- -2
 threstrig <- ggplot() + #this is the ALERT dates
   theme_classic() +
   theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=14,face="bold") ) +
+        axis.title=element_text(size=14) ) +
  # ylim(-40, 150) +
-  labs(y = "LCRI incidence", x = "Date") +
-  geom_bar(aes(y=trainingdata$Cases, x=trainingdata$Date), 
+  labs(y = "Incidence", x = "Date") +
+  geom_bar(aes(y=data$Cases, x=data$Date), 
            width= 7, stat="identity") +
   geom_rect(aes(xmin = dates$startDate[1], 
                 xmax = dates$endDate[1], 
@@ -248,13 +243,13 @@ threstrig <- ggplot() + #this is the ALERT dates
   geom_rect(aes(xmin = ALERT_dates22$start[8], 
                 xmax = ALERT_dates22$end[8], 
                 ymin = -18, ymax = -23), alpha = 0.5) +
-  theme(axis.title.x=element_blank(),
+#  theme(axis.title.x=element_blank(),
 #        axis.text.x=element_blank(),
 #        axis.ticks.x=element_blank(),
-        axis.title.y=element_blank()) +
-  annotate("text", x = as.Date("2004-10-05"), y = -7, label = "3", size=3)+
-  annotate("text", x = as.Date("2004-10-05"), y = -13.5, label = "12", size=3) +
-annotate("text", x = as.Date("2004-10-05"), y = -20, label = "22", size=3) +
+#        axis.title.y=element_text()) +
+  annotate("text", x = as.Date("2004-10-05"), y = -7, label = "6", size=3)+
+  annotate("text", x = as.Date("2004-10-05"), y = -13.815, label = "10", size=3) +
+annotate("text", x = as.Date("2004-10-05"), y = -21, label = "21", size=3) +
   geom_vline(xintercept=as.Date("2008-07-26"), linetype="dashed", 
                  alpha=0.5, show.legend = FALSE )
 
