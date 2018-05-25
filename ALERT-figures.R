@@ -47,8 +47,8 @@ dates <- filter(dates, endDate <= tail(data$Date, 1)+weeks(6))
 #### ALERT DEMO FIGURE   ###################
 ############################################
 
-rawdat <- ggplot(trainingdata, aes(x=Date, y=Cases)) +
-  geom_bar(stat="identity") +
+rawdat <- ggplot(data) +
+  geom_ribbon(stat="identity", aes(x=Date, ymax=Cases), ymin=0) +
  # scale_x_date(limits=c(as.Date("2001-07-07"), as.Date("2005-01-01")))+
   theme_classic()+
 # ggtitle("Training years") +
@@ -57,8 +57,8 @@ rawdat <- ggplot(trainingdata, aes(x=Date, y=Cases)) +
   theme(axis.title.y=element_blank())
   
 ##zeros are dropped because that's what ALERT does
-dens <- ggplot(data=filter(trainingdata, Cases>0), 
-       aes(filter(trainingdata, Cases>0)$Cases)) +
+dens <- ggplot(data=filter(data, Cases>0), 
+       aes(filter(data, Cases>0)$Cases)) +
   theme_classic()+
   geom_density(fill="grey") +
   coord_flip() +
@@ -69,7 +69,7 @@ dens <- ggplot(data=filter(trainingdata, Cases>0),
         axis.title.y=element_blank()) +
   labs(y = "Density") 
 
-grid.arrange(rawdat, dens, ncol=2, left="LCRI incidence")
+grid.arrange(rawdat, dens, ncol=2, left="Incidence")
 
 
 #######################################################
@@ -142,8 +142,9 @@ threstrig <- ggplot() + #this is the ALERT dates
         axis.title=element_text(size=14) ) +
  # ylim(-40, 150) +
   labs(y = "Incidence", x = "Date") +
-  geom_bar(aes(y=data$Cases, x=data$Date), 
-           width= 7, stat="identity") +
+  geom_ribbon(aes(ymax=data$Cases, x=data$Date),
+              ymin=0,
+           stat="identity") +
   geom_rect(aes(xmin = dates$startDate[1], 
                 xmax = dates$endDate[1], 
                 ymin = -27, ymax = 0), alpha = 0.2) +
