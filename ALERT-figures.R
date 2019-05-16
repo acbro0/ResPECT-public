@@ -8,17 +8,17 @@ library(gridExtra)
 
 #real data
 ##load the data
-fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("~/ALERT-characterization/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
 fluA$Date <- ymd(fluA$Date)
 fluA <- arrange(fluA, Date)
 
-fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+fluB <- read.csv("~/ALERT-characterization/applied-ALERT-data/CHCO-fluB.csv", 
                  stringsAsFactors=F)
 fluB$Date <- ymd(fluB$Date)
 fluB <- arrange(fluB, Date)
 
-RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+RSV <- read.csv("~/ALERT-characterization/applied-ALERT-data/CHCO-RSV.csv", 
                  stringsAsFactors=F)
 RSV$Date <- ymd(RSV$Date)
 RSV <- arrange(RSV, Date)
@@ -33,7 +33,7 @@ fulldata <- data
 
 
 ###get the dates that CHCO actually used
-dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
+dates <- read.csv("~/ALERT-characterization/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
 dates$startDate <- ymd(dates$startDate)
 dates$endDate <- ymd(dates$endDate)
 

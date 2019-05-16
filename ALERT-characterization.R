@@ -12,9 +12,11 @@ require(dplyr)
 #                 stringsAsFactors=F)
 
 ##FLU A ONLY
+
+chco <- fulldata
 chco$Date <- ymd(chco$Date)
 chco <- arrange(chco, Date)
-dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
+#dates <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
 dates$startDate <- ymd(dates$startDate)
 dates$endDate <- ymd(dates$endDate)
 #truncate to get years we have cutoffs for and cutoffs we have years for.
@@ -43,8 +45,9 @@ ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
 
 mean(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
 91.5/7
+173.25/7
 
-##choose a threshold of 3 to get 13 weeks.
+##choose a threshold of 3 to get 24.75 weeks.
 
 
 
@@ -72,7 +75,8 @@ createALERT(chco_test)
 
 
 
-
+chco_for_mem <- data.frame(chco_train$Cases[1:52], chco_train$Cases[53:104], 
+                          chco_train$Cases[105:156], chco_train$Cases[157:208])
 
 
 
@@ -336,17 +340,17 @@ grid.arrange(datetrig,threstrig)
 
 #real data
 ##load the data
-fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
 fluA$Date <- ymd(fluA$Date)
 fluA <- arrange(fluA, Date)
 
-fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+fluB <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/CHCO-fluB.csv", 
                  stringsAsFactors=F)
 fluB$Date <- ymd(fluB$Date)
 fluB <- arrange(fluB, Date)
 
-RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+RSV <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/CHCO-RSV.csv", 
                 stringsAsFactors=F)
 RSV$Date <- ymd(RSV$Date)
 RSV <- arrange(RSV, Date)
@@ -543,23 +547,23 @@ grid.arrange(
 
 ###get the other diseases
 
-all <- read.csv("~/Desktop/applied-ALERT-data/chco.csv", stringsAsFactors = F)
+all <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/chco.csv", stringsAsFactors = F)
 
 
 ##alternatively, use the following.
 #real data
 ##load the data
-fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
 fluA$Date <- ymd(fluA$Date)
 fluA <- arrange(fluA, Date)
 
-fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+fluB <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/CHCO-fluB.csv", 
                  stringsAsFactors=F)
 fluB$Date <- ymd(fluB$Date)
 fluB <- arrange(fluB, Date)
 
-RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+RSV <- read.csv("C:/Users/acbro0/Desktop/Projects/applied-ALERT-data/CHCO-RSV.csv", 
                 stringsAsFactors=F)
 RSV$Date <- ymd(RSV$Date)
 RSV <- arrange(RSV, Date)
