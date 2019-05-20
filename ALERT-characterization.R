@@ -29,6 +29,16 @@ chco_test <- chco[211:nrow(chco),]
 
 train_dates <- dates[1:4,]
 
+disProgObj <- create.disProg(week=chco_train$Date, 
+                             observed= chco_train$Cases,
+                             state=rep(1,210))
+
+res <- algo.cusum(disProgObj, 
+                  control = list(range = 1:210, 
+                                 k=30, h = .2, 
+                                 m=NULL,
+                                 trans="none"))
+
 median(difftime(train_dates$startDate, train_dates$endDate))  # median of 18 weeks long in the real data
 128.5/7
 
@@ -36,14 +46,15 @@ median(difftime(train_dates$startDate, train_dates$endDate))  # median of 18 wee
 alertholder <- createALERT(chco_train, firstMonth=7, lag=0, allThresholds = T) #createALERT maybe not calculating median duration corectly?
 #I slacked Steve about it.
 
-threstest <- thresholdtestALERT(chco_train, firstMonth = 7, whichThreshold = 3)
+threstest <- thresholdtestALERT(chco_train, firstMonth = 7, whichThreshold = 10)
 
 ALERT_dates <- data.frame(threstest$details)
 ##convert dates to something human readable for plotting
 ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
 ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
 
-mean(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+median(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13.6 weeks long
+mean(difftime(ALERT_dates$start, ALERT_dates$end))  # mean of 13 weeks long
 91.5/7
 173.25/7
 
@@ -51,14 +62,14 @@ mean(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
 
 
 
-thres2 <- thresholdtestALERT(chco, firstMonth = 7, whichThreshold = 2)[[2]]
+thres2 <- thresholdtestALERT(chco, firstMonth = 7, whichThreshold = 10)[[2]]
 
 ALERT_dates <- data.frame(thres2)
 ##convert dates to something human readable for plotting
 ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
 ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
 
-median(difftime(ALERT_dates$start, ALERT_dates$end))  # median of 13 weeks long
+median(difftime(ALERT_dates$start, ALERT_dates$end))# median of 17 weeks long
 94.7/7
 
 
@@ -75,21 +86,23 @@ createALERT(chco_test)
 
 
 
-chco_for_mem <- data.frame(chco_train$Cases[1:52], chco_train$Cases[53:104], 
-                          chco_train$Cases[105:156], chco_train$Cases[157:208])
+
+median(difftime(dates$start, dates$end))
+128.5/7
 
 
+sum(difftime(dates$start, dates$end))
+1088/7
 
+threstest <- thresholdtestALERT(chco, firstMonth = 7, whichThreshold = 10)
 
+ALERT_dates <- data.frame(threstest$details)
+##convert dates to something human readable for plotting
+ALERT_dates$start <- as.Date(ALERT_dates$start, origin="1970-01-01")
+ALERT_dates$end <- as.Date(ALERT_dates$end, origin="1970-01-01")
 
-
-
-
-
-
-
-
-
+sum(difftime(ALERT_dates$start, ALERT_dates$end))
+1015/7
 
 
 
