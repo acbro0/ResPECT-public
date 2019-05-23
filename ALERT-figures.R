@@ -131,8 +131,25 @@ data.frame(createALERT(data, firstMonth=8,
             lag=0, allThresholds = TRUE) [[1]]) %>%
   filter(threshold==6 | threshold==10 | threshold==21)
 
+# get the CUSUM dates 
 
+disProgObj <- create.disProg(week=data$Date, 
+                             observed= data$Cases,
+                             state=rep(1,414))
 
+res <- algo.cusum(disProgObj, 
+                  control = list(range = 1:414, 
+                                 k=36, h = .2, 
+                                 m=NULL,
+                                 trans="none"))
+data$alarm <- res$alarm
+
+startDate1 <- data$Date[ifelse(data$alarm==1 & lag(data$alarm==0), TRUE, FALSE)==TRUE]
+endDate1 <- data$Date[ifelse(data$alarm==0 & lag(data$alarm==1), TRUE, FALSE)==TRUE]
+
+CUSUM_dates <- data.frame(startDate1, endDate1[2:length(endDate1)])
+
+colnames(CUSUM_dates) <- c("startDate", "endDate")
 
 ymin <- -2
 
@@ -244,6 +261,31 @@ threstrig <- ggplot() + #this is the ALERT dates
   geom_rect(aes(xmin = ALERT_dates22$start[8], 
                 xmax = ALERT_dates22$end[8], 
                 ymin = -18, ymax = -23), alpha = 0.5) +
+  #CUSUM
+  geom_rect(aes(xmin = CUSUM_dates$start[1], 
+                xmax = CUSUM_dates$end[1], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[2], 
+                xmax = CUSUM_dates$end[2], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[3], 
+                xmax = CUSUM_dates$end[3], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[4], 
+                xmax = CUSUM_dates$end[4], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[5], 
+                xmax = CUSUM_dates$end[5], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[6], 
+                xmax = CUSUM_dates$end[6], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[7], 
+                xmax = CUSUM_dates$end[7], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
+  geom_rect(aes(xmin = CUSUM_dates$start[8], 
+                xmax = CUSUM_dates$end[8], 
+                ymin = -27, ymax = -32), alpha = 0.5) +
 #  theme(axis.title.x=element_blank(),
 #        axis.text.x=element_blank(),
 #        axis.ticks.x=element_blank(),
@@ -251,6 +293,7 @@ threstrig <- ggplot() + #this is the ALERT dates
   annotate("text", x = as.Date("2004-10-05"), y = -7, label = "6", size=3)+
   annotate("text", x = as.Date("2004-10-05"), y = -13.815, label = "10", size=3) +
 annotate("text", x = as.Date("2004-10-05"), y = -21, label = "21", size=3) +
+  annotate("text", x = as.Date("2004-09-10"), y = -29, label = "CUSUM", size=3) +
   geom_vline(xintercept=as.Date("2008-07-26"), linetype="dashed", 
                  alpha=0.5, show.legend = FALSE )
 

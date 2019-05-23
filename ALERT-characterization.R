@@ -29,15 +29,8 @@ chco_test <- chco[211:nrow(chco),]
 
 train_dates <- dates[1:4,]
 
-disProgObj <- create.disProg(week=chco_train$Date, 
-                             observed= chco_train$Cases,
-                             state=rep(1,210))
 
-res <- algo.cusum(disProgObj, 
-                  control = list(range = 1:210, 
-                                 k=30, h = .2, 
-                                 m=NULL,
-                                 trans="none"))
+
 
 median(difftime(train_dates$startDate, train_dates$endDate))  # median of 18 weeks long in the real data
 128.5/7
@@ -935,4 +928,141 @@ grid.arrange(
 )
 
 #graph parameters against each other to look for interesting clusters.
+
+# CUSUM
+
+disProgObj <- create.disProg(week=chco_train$Date, 
+                             observed= chco_train$Cases,
+                             state=rep(1,210))
+
+res <- algo.cusum(disProgObj, 
+                  control = list(range = 1:210, 
+                                 k=36, h = .2, 
+                                 m=NULL,
+                                 trans="none"))
+
+chco_train$alarm <- res$alarm
+chco_train$state <- c(rep(1, 40), rep (2, 50), rep (3, 50), rep (4, 70))
+
+tab <- chco_train %>% group_by(alarm, state) %>% summarize(sum=sum(alarm))
+tab[5:8,]$sum
+median(tab[5:8,]$sum)
+
+disProgObj <- create.disProg(week=chco$Date, 
+                             observed= chco$Cases,
+                             state=rep(1,414))
+
+res <- algo.cusum(disProgObj, 
+                  control = list(range = 1:414, 
+                                 k=36, h = .2, 
+                                 m=NULL,
+                                 trans="none"))
+chco$alarm <- res$alarm
+
+chco$alertperiod <- ifelse(chco$alarm==1, TRUE, FALSE)
+
+
+#assign the year
+A <- rep(1, 42)
+for(i in 2:7){
+  A <- append(rep(i, 51), A)
+}
+A <- append(rep(8, nrow(chco)-length(A)), A)
+chco$year <- as.factor(rev(A))
+
+nrow(chco_train)
+nrow(chco_test)
+
+#chco1 <- chco
+chco <- chco1
+chco <- chco[196:nrow(chco),]
+#chco <- chco[1:195,]
+
+tot <- chco %>% group_by(year) %>% 
+  summarise(total_cases=sum(Cases)) #total cases per year
+
+alertcases <- chco %>% filter(chco$alertperiod==TRUE) %>% 
+  group_by(year) %>% 
+  summarise(alert_cases=sum(Cases)) #"ALERT" cases per year
+
+calc <- full_join(tot, alertcases)
+
+calc[is.na(calc)] <- 0
+
+calc$perc_alert <- calc$alert_cases/calc$total_cases *100 #percent alert cases captured
+
+median(calc$perc_alert) #median cases captured
+
+alert_dura <- chco %>% filter(alertperiod==TRUE) %>% 
+  group_by(year) %>% #duration
+  summarise(duration=as.numeric(length(Date)))
+
+calc <- unique(full_join(calc, alert_dura))
+
+holder <- chco %>% group_by(year) %>% 
+  summarise(Cases=max(Cases)) %>%
+  data.frame()
+
+holder <- left_join(holder, chco)
+
+holder <- holder %>% group_by(year) %>% summarise(Date=first(Date))
+
+holder <- left_join(holder, chco) %>% data.frame()
+
+calc$peak_captured <- holder$alertperiod
+
+peaky <- table(calc$peak_captured) %>% data.frame() 
+
+if(nrow(peaky)==2){
+  perc_peaks_captured <- peaky$Freq[2] / peaky$Freq[1]*100
+} else {
+  if (peaky$Var1==TRUE){
+    perc_peaks_captured <- 100
+  } else {
+    perc_peaks_captured <- 0
+  }
+}
+
+holder <- chco %>% group_by(year) %>% summarise(Cases=min(Cases)) %>%
+  data.frame()
+
+holder <- left_join(holder, chco)
+
+#number of 0 weeks included
+holder <- filter(holder, alertperiod==TRUE) %>% group_by(year) %>% 
+  summarise(low_weeks_incl=length(alertperiod))
+
+calc <- left_join(calc, holder) %>% data.frame()
+
+calc$year <- NULL
+
+calc[is.na(calc)] <- 0
+
+cutoffs <- dates %>% arrange(-yearIdx)
+
+calc <- cbind(cutoffs, calc)
+
+calc$yearIdx <- NULL
+
+#get the colnames for eval statistics
+
+alertholder <- data.frame(alertholder$out)
+
+snames <- colnames(alertholder)[-7]
+
+stats_CUSUM <- t(data.frame(c(NA, 
+                             round(median(calc$duration), 1),
+                             round(median(calc$perc_alert), 1), 
+                             round(min(calc$perc_alert), 1), 
+                             round(max(calc$perc_alert), 1), 
+                             round(perc_peaks_captured, 3), 
+                             round(mean(calc$low_weeks_incl), 1))))
+
+colnames(stats_CUSUM) <- snames
+
+require(xtable)
+
+print(xtable(stats_CUSUM), include.rownames=F)
+
+str(stats_real)
 
