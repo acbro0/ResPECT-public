@@ -1,12 +1,12 @@
 
-source("~/Documents/ResPECT-public/ALERT-simulations-fxns.R")
+source("~/Kleinman-computer/ResPECT-public/ALERT-simulations-fxns.R")
 
 library("dplyr")
 library("xtable")
 require(lubridate); year <- lubridate::year
 
 
-dates <- read.csv("~/Desktop/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
+dates <- read.csv("~/Kleinman-computer/ALERT-characterization/applied-ALERT-data/chco-trigger-dates.csv", stringsAsFactors = F)
 
 dates$startDate <- ymd(dates$startDate)
 
@@ -15,19 +15,19 @@ dates$endDate <- ymd(dates$endDate)
 ##alternatively, use the following.
 #real data
 ##load the data
-fluA <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluA.csv", 
+fluA <- read.csv("~/Kleinman-computer/ALERT-characterization/applied-ALERT-data/CHCO-fluA.csv", 
                  stringsAsFactors=F)
 fluA$Date <- ymd(fluA$Date)
 fluA <- arrange(fluA, Date)
 
 dates <- ymd(fluA$Date) ##need this later for the simulations
 
-fluB <- read.csv("~/Desktop/applied-ALERT-data/CHCO-fluB.csv", 
+fluB <- read.csv("~/Kleinman-computer/ALERT-characterization/applied-ALERT-data/CHCO-fluB.csv", 
                  stringsAsFactors=F)
 fluB$Date <- ymd(fluB$Date)
 fluB <- arrange(fluB, Date)
 
-RSV <- read.csv("~/Desktop/applied-ALERT-data/CHCO-RSV.csv", 
+RSV <- read.csv("~/Kleinman-computer/ALERT-characterization/applied-ALERT-data/CHCO-RSV.csv", 
                 stringsAsFactors=F)
 RSV$Date <- ymd(RSV$Date)
 RSV <- arrange(RSV, Date)
@@ -37,17 +37,7 @@ Date <- fluA$Date
 
 data <- data.frame(Date, Cases)
 all <- data
-
-
-
-#bugnames <- colnames(all[2:4])
-
-#all <- all[1:4]
-
-#all$date <- mdy(all$Date..Month.Year.)
-
 all <- arrange(all, by=Date)
-
 all$state <- 0
 
 #specify the model for endemic and autoregressive components
@@ -62,13 +52,12 @@ chco.dat <- surveillance::disProg2sts(DisProg.dat)# convert to sts class
 
 #  # run model
 chco.dat_res <- surveillance::hhh4(chco.dat, model1)
-#  j <- as.integer(i-1)
 holder <- chco.dat_res$coefficients
 
 
 all <- data.frame(data.table::rbindlist(lapply(holder,as.list)))
 
-#coefnames <- names(holder)
+coefnames <- names(holder)
 rownames(all) <- c("lambda", "alpha", "beta",
                    "gamma", "delta", "psi")
 
@@ -81,13 +70,7 @@ print(xtable(all, type="html", digits=4))
 ### use param values within 1 sd for upper and lower bounds
 upper <- all[1]+(2*chco.dat_res$se)
 lower <- all[1]-(2*chco.dat_res$se)
-
-#upper <- rep(1.75, nrow(all))
-#lower <- rep(-3.0, nrow(all))
-
 limits <- data.frame(lower, upper)
-
-#seq(from=limits[1,1], to=limits[1,2], length.out=50)
 
 holder <- list()
 
@@ -101,10 +84,6 @@ ranges <- t(data.frame(data.table::rbindlist(lapply(holder,as.list))))
 names(holder) <- coefnames
 
 ranges <- data.frame(ranges)
-
-#holder <- list()
-
-#names(holder) <- coefnames
 
 coefs <- chco.dat_res$coefficients
 colnames(ranges) <- coefnames
@@ -176,8 +155,6 @@ ranges <- rbind(lambda, alpha, beta, delta, gamma, psi)
 ######## PREP FOR SIMULATION #############
 ##########################################
 
-#dates <- chco$Date
-
 library("ALERT")
 
 #this is for when there is a firstMonth error. It will be filtered in the following steps.
@@ -237,7 +214,7 @@ for (i in 1:nrow(ranges)){
       simset <- data.frame(minisim[[k]], dates)
       colnames(simset) <- c("Cases", "Date")
       simset$Date <- as.Date(simset$Date)
-      write.csv(simset, file=paste("~/Desktop/applied-ALERT-data/simulated-data/", 
+      write.csv(simset, file=paste("~/Kleinman-computer/ALERT-characterization/applied-ALERT-data/simulated-data/", 
                                    ranges$param[i], ranges$value[i],
                                    "sim#", k, ".csv", sep="_"))
       simset_train <- simset[1:260,]
@@ -254,7 +231,6 @@ for (i in 1:nrow(ranges)){
       alertstats2[((i-1)*snum)+k,] <- c(get_stats(simset_train, firstMonth=firstMonth_value,
                                                   minWeeks=minWeeks_value,
                                           params=params), firstMonth_value, k)
-     # print(alertstats2[((i-1)*snum)+k,])
      }
 }
 
@@ -291,6 +267,7 @@ med.stats <- alertstats %>% mutate(threshold=as.numeric(threshold),
     test.median.dur=as.numeric(test.median.dur),
     test.mean.low.weeks.incl=as.numeric(test.mean.low.weeks.incl),
     mean.low.weeks.incl=as.numeric(mean.low.weeks.incl),
+    pct.peaks.captured = as.numeric(pct.peaks.captured),
     firstMonth=as.numeric(firstMonth)) %>% 
   filter(success==TRUE) %>% group_by(parameter, value) %>%
     summarise(test.median.pct.cases.captured=median(test.median.pct.cases.captured), 
@@ -458,7 +435,7 @@ peaks.pct.diff.performance
 
 ## plot a set of randomly selected data
 
-directory <- dir("~/Desktop/applied-ALERT-data/simulated-data/")
+directory <- dir("~/applied-ALERT-data/simulated-data/")
 
 sim_plot <- sample(directory,20,replace=FALSE)
 
